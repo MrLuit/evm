@@ -13,7 +13,7 @@ function stringifyInstructions(depthInstructions,debug = false,indentation = 0) 
             instructionLines += " ".repeat(indentation) + "} else ";
             const elseOrElseIf = stringifyInstructions(instruction.jump.false,debug,indentation);
             if(elseOrElseIf.trim().startsWith("if")) {
-                instructionLines += elseOrElseIf;
+                instructionLines += elseOrElseIf.trim() + "\n";
             } else {
                 instructionLines += "{\n" + elseOrElseIf.split("\n").filter(l => l).map(l => " ".repeat(4) + l).join("\n");
                 instructionLines += "\n" + " ".repeat(indentation) +"}\n";
