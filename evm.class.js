@@ -4,7 +4,7 @@ const parseFunction = require("./utils/functions");
 function stringifyInstructions(depthInstructions,debug = false,indentation = 0) {
     let instructionLines = "";
     depthInstructions.forEach(instruction => {
-        if(instruction.jump && instruction.jump.false.filter(i => !i.debug).length == 1 && instruction.jump.false.filter(i => !i.debug)[0].text == "revert();") {
+        if(instruction.jump && instruction.jump.false.filter(i => !i.debug).length == 1 && instruction.jump.false.filter(i => !i.debug)[0].text == "revert();" && !instruction.jump.condition.includes("msg.sig")) {
             instructionLines += " ".repeat(indentation) + "require" + instruction.jump.condition + ";\n";
             instructionLines += stringifyInstructions(instruction.jump.true,debug,indentation);
         } else if(instruction.jump && instruction.jump.false.filter(i => !i.debug).length == 1 && instruction.jump.false.filter(i => !i.debug)[0].jump) {
@@ -15,8 +15,8 @@ function stringifyInstructions(depthInstructions,debug = false,indentation = 0) 
             if(elseOrElseIf.trim().startsWith("if")) {
                 instructionLines += elseOrElseIf;
             } else {
-                instructionLines += "{\n" + elseOrElseIf.split("\n").filter(l => l).map(l => " ".repeat(indentation+4) + l).join("\n");
-                instructionLines += "\n}";
+                instructionLines += "{\n" + elseOrElseIf.split("\n").filter(l => l).map(l => " ".repeat(4) + l).join("\n");
+                instructionLines += "\n" + " ".repeat(indentation) +"}\n";
             }
         } else if(instruction.jump) {
             instructionLines += " ".repeat(indentation) + "if" + instruction.jump.condition + " {\n";
@@ -33,14 +33,14 @@ function stringifyInstructions(depthInstructions,debug = false,indentation = 0) 
 
 function parseFunctions(stringifiedInstructions) {
     return stringifiedInstructions.split("\n").map(line => {
-        if(!line.startsWith(" ") && line.includes("msg.data.substring(0,4)")) {
-            let functionHash = line.split(" == ").find(piece => !piece.includes("msg.data.substring(0,4)"));
+        if(!line.startsWith(" ") && line.includes("msg.sig")) {
+            let functionHash = line.split(" == ").find(piece => !piece.includes("msg.sig"));
             if(functionHash.includes("(")) {
                 functionHash = functionHash.split("(")[1];
             } else if(functionHash.includes(")")) {
                 functionHash = functionHash.split(")")[0];
             }
-            return "function " + parseFunction(functionHash) + " {";
+            return "}\n\nfunction " + parseFunction(functionHash) + " {";
         } else {
             return line;
         }
@@ -146,10 +146,10 @@ const EVM = class EVM {
                 case "DIV": { /* if(stackItem2 == 0) stack.push(0); */
                     const stackItem1 = this.stack.pop();
                     const stackItem2 = this.stack.pop();
-                    if(stackItem1 == "msg.data" && stackItem2 == "0100000000000000000000000000000000000000000000000000000000") {
-                        /* msg.data contains 32 bytes (33 including 0x), stackItem2 contains 29 bytes; only the first 4 bytes are left */
-                        this.stack.push("msg.data.substring(0,4)");
-                        pseudoInstruction.text = "stack.push(msg.data.substring(0,4));";
+                    if(stackItem1 == "msg.data" && (stackItem2 == "0100000000000000000000000000000000000000000000000000000000" || stackItem2 == "100000000000000000000000000000000000000000000000000000000")) {
+                        /* msg.data contains 32 bytes (33 including 0x), stackItem2 contains 29 bytes; only the first 4 bytes (function signature) are left */
+                        this.stack.push("msg.sig");
+                        pseudoInstruction.text = "stack.push(msg.sig);";
                     } else {
                         this.stack.push("(" + stackItem1 + " / " + stackItem2 + ")");
                         pseudoInstruction.text = "stack.push(" + stackItem1 + " / " + stackItem2 + ");";
@@ -159,8 +159,13 @@ const EVM = class EVM {
                 case "EXP": {
                     const stackItem1 = this.stack.pop();
                     const stackItem2 = this.stack.pop();
-                    this.stack.push("(" + stackItem1 + " ** " + stackItem2 + ")");
-                    pseudoInstruction.text = "stack.push(" + stackItem1 + " ** " + stackItem2 + ");";
+                    if(!isNaN(parseInt(stackItem1,16)) && !isNaN(parseInt(stackItem2,16))) {
+                        this.stack.push((parseInt(stackItem1,16)**parseInt(stackItem2,16)).toString(16));
+                        pseudoInstruction.text = "stack.push(" + (parseInt(stackItem1,16)**parseInt(stackItem2,16)).toString(16) + ");";
+                    } else {
+                        this.stack.push("(" + stackItem1 + " ** " + stackItem2 + ")");
+                        pseudoInstruction.text = "stack.push(" + stackItem1 + " ** " + stackItem2 + ");";
+                    }
                     pseudoInstruction.debug = true;
                 } break;
                 case "LT": {
@@ -199,11 +204,11 @@ const EVM = class EVM {
                 case "AND": {
                     const stackItem1 = this.stack.pop();
                     const stackItem2 = this.stack.pop();
-                    if(/^f*$/.test(stackItem1)) {
+                    if(/^f*$/.test(stackItem1) || stackItem1 == "10000000000000000000000000000000000000000") {
                         // Since type / length matching is not really useful for our use case, we won't include it
                         this.stack.push(stackItem2);
                         pseudoInstruction.text = "stack.push(" + stackItem2 + ");";
-                    } else if(/^f*$/.test(stackItem2)) {
+                    } else if(/^f*$/.test(stackItem2) || stackItem2 == "10000000000000000000000000000000000000000") {
                         // Since type / length matching is not really useful for our use case, we won't include it
                         this.stack.push(stackItem1);
                         pseudoInstruction.text = "stack.push(" + stackItem1 + ");";
@@ -230,10 +235,10 @@ const EVM = class EVM {
                     const startLocation = this.stack.pop();
                     const memoryLength = this.stack.pop();
                     if(startLocation == '00') {
-                        this.stack.push("(sha3(memory.substring(0," + memoryLength + ")))");
+                        this.stack.push("sha3(memory.substring(0," + memoryLength + "))");
                         pseudoInstruction.text = "stack.push(sha3(memory.substring(0," + memoryLength + ")));";
                     } else {
-                        this.stack.push("(sha3(memory.substring(" + startLocation + ",(" + startLocation + "+" + memoryLength + "))))");
+                        this.stack.push("sha3(memory.substring(" + startLocation + ",(" + startLocation + "+" + memoryLength + ")))");
                         pseudoInstruction.text = "stack.push(sha3(memory.substring(" + startLocation + ",(" + startLocation + "+" + memoryLength + "))));";
                     }
                     pseudoInstruction.debug = true;
@@ -280,12 +285,25 @@ const EVM = class EVM {
                     pseudoInstruction.text = "stack.push(msg.data.length);";
                     pseudoInstruction.debug = true;
                 } break;
+                case "CALLDATACOPY": {
+                    const memoryLocation = this.stack.pop();
+                    const startLocation = this.stack.pop();
+                    const copyLength = this.stack.pop();
+                    this.memory[memoryLocation] = "msg.data.substring(" + startLocation + ",(" + startLocation + "+" + copyLength + ")";
+                    pseudoInstruction.text = "memory[" + memoryLocation + "] = msg.data.substring(" + startLocation + ",(" + startLocation + "+" + copyLength + "));";
+                } break;
                 case "CODECOPY": {
                     const memoryLocation = this.stack.pop();
                     const startLocation = this.stack.pop();
                     const copyLength = this.stack.pop();
                     this.memory[memoryLocation] = "this.code.substring(" + startLocation + ",(" + startLocation + "+" + copyLength + ")";
                     pseudoInstruction.text = "memory[" + memoryLocation + "] = this.code.substring(" + startLocation + ",(" + startLocation + "+" + copyLength + "));";
+                } break;
+                case "EXTCODESIZE": {
+                    const address = this.stack.pop();
+                    this.stack.push("extcodesize(" + address + ");");
+                    pseudoInstruction.text = "stack.push(extcodesize(" + address + "));";
+                    pseudoInstruction.debug = true;
                 } break;
                 case "RETURNDATASIZE": {
                     this.stack.push("output.length");
@@ -318,19 +336,19 @@ const EVM = class EVM {
                     const storeLocation = this.stack.pop();
                     const storeData = this.stack.pop();
                     this.memory[storeLocation] = storeData;
-                    pseudoInstruction.text = "memory[" + storeLocation.toString('hex') + "] = " + storeData.toString('hex') + ";";
+                    pseudoInstruction.text = "memory[" + (!isNaN(parseInt(storeLocation,16)) ? '0x' + storeLocation : storeLocation) + "] = " + (!isNaN(parseInt(storeData,16)) ? '0x' + storeData : storeData) + ";";
                 } break;
                 case "SLOAD": {
-                    const storageLocation = this.stack.pop();
-                    this.stack.push("storage[" + storageLocation + "]");
-                    pseudoInstruction.text = "stack.push(storage[" + storageLocation + "]);";
+                    const storeLocation = this.stack.pop();
+                    this.stack.push("storage[" + (!isNaN(parseInt(storeLocation,16)) ? '0x' + storeLocation : storeLocation) + "]");
+                    pseudoInstruction.text = "stack.push(storage[" + (!isNaN(parseInt(storeLocation,16)) ? '0x' + storeLocation : storeLocation) + "]);";
                     pseudoInstruction.debug = true;
                 } break;
                 case "SSTORE": {
                     const storeLocation = this.stack.pop();
                     const storeData = this.stack.pop();
                     this.storage[storeLocation] = storeData;
-                    pseudoInstruction.text = "storage[" + storeLocation.toString('hex') + "] = " + storeData.toString('hex') + ";";
+                    pseudoInstruction.text = "storage[" + (!isNaN(parseInt(storeLocation,16)) ? '0x' + storeLocation : storeLocation) + "] = " + (!isNaN(parseInt(storeData,16)) ? '0x' + storeData : storeData) + ";";
                 } break;
                 case "JUMP": {
                     const jumpLocation = this.stack.pop();
@@ -373,6 +391,11 @@ const EVM = class EVM {
                     };
                 }
                     pseudoInstruction.halt = true;
+                } break;
+                case "GAS": {
+                    this.stack.push("gasleft()");
+                    pseudoInstruction.text = "stack.push(gasleft());";
+                    pseudoInstruction.debug = true;
                 } break;
                 case "JUMPDEST": {
                     pseudoInstruction.text = "JUMPDEST";
@@ -600,6 +623,19 @@ const EVM = class EVM {
                     const memoryLength = this.stack.pop();
                     pseudoInstruction.text = "log(memory[" + memoryStart + ",(" + memoryStart + "+" + memoryLength + ")]);";
                 } break;
+                case "LOG1": {
+                    const memoryStart = this.stack.pop();
+                    const memoryLength = this.stack.pop();
+                    const topic1 = this.stack.pop();
+                    pseudoInstruction.text = "log(memory[" + memoryStart + ",(" + memoryStart + "+" + memoryLength + ")]," + topic1 + ");";
+                } break;
+                case "LOG2": {
+                    const memoryStart = this.stack.pop();
+                    const memoryLength = this.stack.pop();
+                    const topic1 = this.stack.pop();
+                    const topic2 = this.stack.pop();
+                    pseudoInstruction.text = "log(memory[" + memoryStart + ",(" + memoryStart + "+" + memoryLength + ")]," + topic1 + "," + topic2 + ");";
+                } break;
                 case "LOG3": {
                     const memoryStart = this.stack.pop();
                     const memoryLength = this.stack.pop();
@@ -607,6 +643,15 @@ const EVM = class EVM {
                     const topic2 = this.stack.pop();
                     const topic3 = this.stack.pop();
                     pseudoInstruction.text = "log(memory[" + memoryStart + ",(" + memoryStart + "+" + memoryLength + ")]," + topic1 + "," + topic2 + "," + topic3 + ");";
+                } break;
+                case "LOG4": {
+                    const memoryStart = this.stack.pop();
+                    const memoryLength = this.stack.pop();
+                    const topic1 = this.stack.pop();
+                    const topic2 = this.stack.pop();
+                    const topic3 = this.stack.pop();
+                    const topic4 = this.stack.pop();
+                    pseudoInstruction.text = "log(memory[" + memoryStart + ",(" + memoryStart + "+" + memoryLength + ")]," + topic1 + "," + topic2 + "," + topic3 + "," + topic4 + ");";
                 } break;
                 case "CALL": {
                     const gas = this.stack.pop();
@@ -616,15 +661,17 @@ const EVM = class EVM {
                     const memoryLength = this.stack.pop();
                     const outputStart = this.stack.pop();
                     const outputLength = this.stack.pop();
-                    //this.stack.push("(" + a + ").call()");
-                    //pseudoInstruction.text = "stack.push();";
                     this.stack.push("call(" + gas + "," + address + "," + value + "," + memoryStart + "," + memoryLength + "," + outputStart + "," + outputLength + ")");
                     pseudoInstruction.text = "stack.push(call(" + gas + "," + address + "," + value + "," + memoryStart + "," + memoryLength + "," + outputStart + "," + outputLength + "))";
                 } break;
                 case "RETURN": {
                     const memoryLocationStart = this.stack.pop();
                     const memoryLocationLength = this.stack.pop();
-                    pseudoInstruction.text = "return memory.substring(" + memoryLocationStart + ",(" + memoryLocationStart + "+" + memoryLocationLength + "));";
+                    if(!isNaN(parseInt(memoryLocationStart,16)) && !isNaN(parseInt(memoryLocationLength,16))) {
+                        pseudoInstruction.text = "return memory[" + memoryLocationStart + ":" + (parseInt(memoryLocationStart,16)+parseInt(memoryLocationLength,16)).toString(16) + ")];";
+                    } else {
+                        pseudoInstruction.text = "return memory[" + memoryLocationStart + ":(" + memoryLocationStart + "+" + memoryLocationLength + ")];";
+                    }
                     pseudoInstruction.halt = true;
                 } break;
                 case "REVERT": {
@@ -643,7 +690,7 @@ const EVM = class EVM {
                     pseudoInstruction.text = "INVALID? (" + opCode.opcode.toString(16) + ")";
                 } break;
                 default: {
-                    console.log("Warning: " + opCode.name + " not implemented");
+                    console.error("Error: " + opCode.name + " not implemented");
                     process.exit();
                     pseudoInstruction.text = opCode.name + (opCode.pushData ? " 0x" + opCode.pushData.toString('hex') : "");
                 }
