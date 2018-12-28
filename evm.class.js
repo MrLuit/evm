@@ -235,11 +235,11 @@ const EVM = class EVM {
                     const startLocation = this.stack.pop();
                     const memoryLength = this.stack.pop();
                     if(startLocation == '00') {
-                        this.stack.push("sha3(memory.substring(0," + memoryLength + "))");
-                        pseudoInstruction.text = "stack.push(sha3(memory.substring(0," + memoryLength + ")));";
+                        this.stack.push("sha3(memory[0x00:0x" + memoryLength + "]))");
+                        pseudoInstruction.text = "stack.push(sha3(memory[0x00:0x" + memoryLength + "]));";
                     } else {
-                        this.stack.push("sha3(memory.substring(" + startLocation + ",(" + startLocation + "+" + memoryLength + ")))");
-                        pseudoInstruction.text = "stack.push(sha3(memory.substring(" + startLocation + ",(" + startLocation + "+" + memoryLength + "))));";
+                        this.stack.push("sha3(memory[0x" + startLocation + ":(0x" + startLocation + "+0x" + memoryLength + ")])");
+                        pseudoInstruction.text = "stack.push(sha3(memory[0x" + startLocation + ":(0x" + startLocation + "+0x" + memoryLength + ")]));";
                     }
                     pseudoInstruction.debug = true;
                 } break;
@@ -275,8 +275,8 @@ const EVM = class EVM {
                         this.stack.push("msg.data");
                         pseudoInstruction.text = "stack.push(msg.data);";
                     } else {
-                        this.stack.push("msg.data.substring(" + parseInt(startLocation,16) + ")");
-                        pseudoInstruction.text = "stack.push(msg.data.substring(" + parseInt(startLocation,16) + "));";
+                        this.stack.push("msg.data[0x" + startLocation + "]");
+                        pseudoInstruction.text = "stack.push(msg.data[0x" + startLocation + "]);";
                     }
                     pseudoInstruction.debug = true;
                 } break;
@@ -663,14 +663,15 @@ const EVM = class EVM {
                     const outputLength = this.stack.pop();
                     this.stack.push("call(" + gas + "," + address + "," + value + "," + memoryStart + "," + memoryLength + "," + outputStart + "," + outputLength + ")");
                     pseudoInstruction.text = "stack.push(call(" + gas + "," + address + "," + value + "," + memoryStart + "," + memoryLength + "," + outputStart + "," + outputLength + "))";
+                    pseudoInstruction.debug = true;
                 } break;
                 case "RETURN": {
                     const memoryLocationStart = this.stack.pop();
                     const memoryLocationLength = this.stack.pop();
                     if(!isNaN(parseInt(memoryLocationStart,16)) && !isNaN(parseInt(memoryLocationLength,16))) {
-                        pseudoInstruction.text = "return memory[" + memoryLocationStart + ":" + (parseInt(memoryLocationStart,16)+parseInt(memoryLocationLength,16)).toString(16) + ")];";
+                        pseudoInstruction.text = "return memory[0x" + memoryLocationStart + ":0x" + (parseInt(memoryLocationStart,16)+parseInt(memoryLocationLength,16)).toString(16) + ")];";
                     } else {
-                        pseudoInstruction.text = "return memory[" + memoryLocationStart + ":(" + memoryLocationStart + "+" + memoryLocationLength + ")];";
+                        pseudoInstruction.text = "return memory[0x" + memoryLocationStart + ":(0x" + memoryLocationStart + "+0x" + memoryLocationLength + ")];";
                     }
                     pseudoInstruction.halt = true;
                 } break;
