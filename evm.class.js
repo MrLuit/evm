@@ -299,6 +299,11 @@ const EVM = class EVM {
                     this.memory[memoryLocation] = "this.code.substring(" + startLocation + ",(" + startLocation + "+" + copyLength + ")";
                     pseudoInstruction.text = "memory[" + memoryLocation + "] = this.code.substring(" + startLocation + ",(" + startLocation + "+" + copyLength + "));";
                 } break;
+                case "GASPRICE": {
+                    this.stack.push("tx.gasprice");
+                    pseudoInstruction.text = "stack.push(tx.gasprice);";
+                    pseudoInstruction.debug = true;
+                } break;
                 case "EXTCODESIZE": {
                     const address = this.stack.pop();
                     this.stack.push("extcodesize(" + address + ");");
@@ -315,6 +320,37 @@ const EVM = class EVM {
                     const returnDataPosition = this.stack.pop();
                     const returnDataSize = this.stack.pop();
                     pseudoInstruction.text = "memory[" + memoryPosition + "] = output.substring(" + returnDataPosition + ",(" + returnDataPosition + "+" + returnDataSize + "))";
+                } break;
+                case "BLOCKHASH": {
+                    const blockNumber = this.stack.pop();
+                    this.stack.push("block.blockhash(" + blockNumber + ")");
+                    pseudoInstruction.text = "stack.push(block.blockhash(" + blockNumber + "));";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "COINBASE": {
+                    this.stack.push("block.coinbase");
+                    pseudoInstruction.text = "stack.push(block.coinbase);";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "TIMESTAMP": {
+                    this.stack.push("block.timestamp");
+                    pseudoInstruction.text = "stack.push(block.timestamp);";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "NUMBER": {
+                    this.stack.push("block.number");
+                    pseudoInstruction.text = "stack.push(block.number);";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "DIFFICULTY": {
+                    this.stack.push("block.difficulty");
+                    pseudoInstruction.text = "stack.push(block.difficulty);";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "GASLIMIT": {
+                    this.stack.push("block.gaslimit");
+                    pseudoInstruction.text = "stack.push(block.gaslimit);";
+                    pseudoInstruction.debug = true;
                 } break;
                 case "POP": {
                     this.stack.pop();
@@ -333,6 +369,12 @@ const EVM = class EVM {
                     pseudoInstruction.debug = true;
                 } break;
                 case "MSTORE": {
+                    const storeLocation = this.stack.pop();
+                    const storeData = this.stack.pop();
+                    this.memory[storeLocation] = storeData;
+                    pseudoInstruction.text = "memory[" + (!isNaN(parseInt(storeLocation,16)) ? '0x' + storeLocation : storeLocation) + "] = " + (!isNaN(parseInt(storeData,16)) ? '0x' + storeData : storeData) + ";";
+                } break;
+                case "MSTORE8": {
                     const storeLocation = this.stack.pop();
                     const storeData = this.stack.pop();
                     this.memory[storeLocation] = storeData;
@@ -392,6 +434,16 @@ const EVM = class EVM {
                 }
                     pseudoInstruction.halt = true;
                 } break;
+                case "PC": {
+                    this.stack.push("pc");
+                    pseudoInstruction.text = "stack.push(pc);";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "MSIZE": {
+                    this.stack.push("memory.length");
+                    pseudoInstruction.text = "stack.push(memory.length);";
+                    pseudoInstruction.debug = true;
+                } break;
                 case "GAS": {
                     this.stack.push("gasleft()");
                     pseudoInstruction.text = "stack.push(gasleft());";
@@ -441,6 +493,61 @@ const EVM = class EVM {
                     pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
                     pseudoInstruction.debug = true;
                 } break;
+                case "PUSH9": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH10": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH11": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH12": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH13": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH14": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH15": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH16": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH17": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH18": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH19": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
                 case "PUSH20": {
                     this.stack.push(opCode.pushData.toString('hex'));
                     pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
@@ -451,7 +558,47 @@ const EVM = class EVM {
                     pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
                     pseudoInstruction.debug = true;
                 } break;
+                case "PUSH22": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH23": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH24": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH25": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH26": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH27": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH28": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
                 case "PUSH29": {
+                    this.stack.push(opCode.pushData.toString('hex'));
+                    pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "PUSH30": {
                     this.stack.push(opCode.pushData.toString('hex'));
                     pseudoInstruction.text = "stack.push(" + opCode.pushData.toString('hex') + ");";
                     pseudoInstruction.debug = true;
@@ -618,6 +765,78 @@ const EVM = class EVM {
                     pseudoInstruction.text = "stack[0] = " + stackItem8 + "; stack[7] = " + stackItem1 + ";";
                     pseudoInstruction.debug = true;
                 } break;
+                case "SWAP8": {
+                    const stackItem1 = this.stack[this.stack.length-1];
+                    const stackItem9 = this.stack[this.stack.length-9];
+                    this.stack[this.stack.length-9] = stackItem1;
+                    this.stack[this.stack.length-1] = stackItem9;
+                    pseudoInstruction.text = "stack[0] = " + stackItem9 + "; stack[8] = " + stackItem1 + ";";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "SWAP9": {
+                    const stackItem1 = this.stack[this.stack.length-1];
+                    const stackItem10 = this.stack[this.stack.length-10];
+                    this.stack[this.stack.length-10] = stackItem1;
+                    this.stack[this.stack.length-1] = stackItem10;
+                    pseudoInstruction.text = "stack[0] = " + stackItem10 + "; stack[9] = " + stackItem1 + ";";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "SWAP10": {
+                    const stackItem1 = this.stack[this.stack.length-1];
+                    const stackItem11 = this.stack[this.stack.length-11];
+                    this.stack[this.stack.length-11] = stackItem1;
+                    this.stack[this.stack.length-1] = stackItem11;
+                    pseudoInstruction.text = "stack[0] = " + stackItem11 + "; stack[10] = " + stackItem1 + ";";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "SWAP11": {
+                    const stackItem1 = this.stack[this.stack.length-1];
+                    const stackItem12 = this.stack[this.stack.length-12];
+                    this.stack[this.stack.length-12] = stackItem1;
+                    this.stack[this.stack.length-1] = stackItem12;
+                    pseudoInstruction.text = "stack[0] = " + stackItem12 + "; stack[11] = " + stackItem1 + ";";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "SWAP12": {
+                    const stackItem1 = this.stack[this.stack.length-1];
+                    const stackItem13 = this.stack[this.stack.length-13];
+                    this.stack[this.stack.length-13] = stackItem1;
+                    this.stack[this.stack.length-1] = stackItem13;
+                    pseudoInstruction.text = "stack[0] = " + stackItem13 + "; stack[12] = " + stackItem1 + ";";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "SWAP13": {
+                    const stackItem1 = this.stack[this.stack.length-1];
+                    const stackItem14 = this.stack[this.stack.length-14];
+                    this.stack[this.stack.length-14] = stackItem1;
+                    this.stack[this.stack.length-1] = stackItem14;
+                    pseudoInstruction.text = "stack[0] = " + stackItem14 + "; stack[13] = " + stackItem1 + ";";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "SWAP14": {
+                    const stackItem1 = this.stack[this.stack.length-1];
+                    const stackItem15 = this.stack[this.stack.length-15];
+                    this.stack[this.stack.length-15] = stackItem1;
+                    this.stack[this.stack.length-1] = stackItem15;
+                    pseudoInstruction.text = "stack[0] = " + stackItem15 + "; stack[14] = " + stackItem1 + ";";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "SWAP15": {
+                    const stackItem1 = this.stack[this.stack.length-1];
+                    const stackItem16 = this.stack[this.stack.length-16];
+                    this.stack[this.stack.length-16] = stackItem1;
+                    this.stack[this.stack.length-1] = stackItem16;
+                    pseudoInstruction.text = "stack[0] = " + stackItem16 + "; stack[15] = " + stackItem1 + ";";
+                    pseudoInstruction.debug = true;
+                } break;
+                case "SWAP16": {
+                    const stackItem1 = this.stack[this.stack.length-1];
+                    const stackItem17 = this.stack[this.stack.length-17];
+                    this.stack[this.stack.length-17] = stackItem1;
+                    this.stack[this.stack.length-1] = stackItem17;
+                    pseudoInstruction.text = "stack[0] = " + stackItem17 + "; stack[16] = " + stackItem1 + ";";
+                    pseudoInstruction.debug = true;
+                } break;
                 case "LOG0": {
                     const memoryStart = this.stack.pop();
                     const memoryLength = this.stack.pop();
@@ -689,6 +908,10 @@ const EVM = class EVM {
                 } break;
                 case "INVALID": {
                     pseudoInstruction.text = "INVALID? (" + opCode.opcode.toString(16) + ")";
+                } break;
+                case "SELFDESTRUCT": {
+                    const address = this.stack.pop();
+                    pseudoInstruction.text = "selfdestruct(" + address + ");";
                 } break;
                 default: {
                     console.error("Error: " + opCode.name + " not implemented");
