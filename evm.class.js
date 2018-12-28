@@ -235,7 +235,7 @@ const EVM = class EVM {
                     const startLocation = this.stack.pop();
                     const memoryLength = this.stack.pop();
                     if(startLocation == '00') {
-                        this.stack.push("sha3(memory[0x00:0x" + memoryLength + "]))");
+                        this.stack.push("sha3(memory[0x00:0x" + memoryLength + "])");
                         pseudoInstruction.text = "stack.push(sha3(memory[0x00:0x" + memoryLength + "]));";
                     } else {
                         this.stack.push("sha3(memory[0x" + startLocation + ":(0x" + startLocation + "+0x" + memoryLength + ")])");
