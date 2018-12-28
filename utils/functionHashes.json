@@ -1,0 +1,15 @@
+{
+    "06fdde03": "name()",
+    "95d89b41": "symbol()",
+    "313ce567": "decimals()",
+    "18160ddd": "totalSupply()",
+    "273ba6bb": "ICO()",
+    "02d05d3f": "creator()",
+    "70a08231": "balanceOf(address)",
+    "a9059cbb": "transfer(address,uint256)",
+    "23b872dd": "transferFrom(address,address,uint256)",
+    "095ea7b3": "approve(address,uint256)",
+    "dd62ed3e": "allowance(address,address)",
+    "cee401ef": "enableICO()",
+    "666b7d32": "disableICO()"
+}

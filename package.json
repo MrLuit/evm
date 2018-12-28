@@ -1,0 +1,25 @@
+{
+  "name": "evm-bytecode-decompiler",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "node ./scripts/build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrLuit/evm-bytecode-decompiler.git"
+  },
+  "author": "Luit",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MrLuit/evm-bytecode-decompiler/issues"
+  },
+  "homepage": "https://github.com/MrLuit/evm-bytecode-decompiler#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "ethereumjs-vm": "2.5.0",
+    "web3": "1.0.0-beta.37"
+  }
+}
