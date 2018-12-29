@@ -20,9 +20,11 @@ import CALLVALUE from '../opcodes/callvalue';
 import CALLDATALOAD from '../opcodes/calldataload';
 import CALLDATASIZE from '../opcodes/calldatasize';
 import CALLDATACOPY from '../opcodes/calldatacopy';
+import CODECOPY from '../opcodes/codecopy';
 import GASPRICE from '../opcodes/gasprice';
 import EXTCODESIZE from '../opcodes/extcodesize';
 import RETURNDATASIZE from '../opcodes/returndatasize';
+import RETURNDATACOPY from '../opcodes/returndatacopy';
 import BLOCKHASH from '../opcodes/blockhash';
 import COINBASE from '../opcodes/coinbase';
 import TIMESTAMP from '../opcodes/timestamp';
@@ -73,9 +75,11 @@ export default {
     CALLDATALOAD,
     CALLDATASIZE,
     CALLDATACOPY,
+    CODECOPY,
     GASPRICE,
     EXTCODESIZE,
     RETURNDATASIZE,
+    RETURNDATACOPY,
     BLOCKHASH,
     COINBASE,
     TIMESTAMP,
