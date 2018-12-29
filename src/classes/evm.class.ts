@@ -1,28 +1,7 @@
 const findOpcode = require('../../node_modules/ethereumjs-vm/dist/opcodes.js');
-import parseFunction from '../utils/functions';
 import allOpcodes from '../utils/opcodes';
 import stringifyInstructions from '../utils/stringifyInstructions';
-
-function parseFunctions(stringifiedInstructions: any) {
-    return stringifiedInstructions
-        .split('\n')
-        .map((line: any) => {
-            if (!line.startsWith(' ') && line.includes('msg.sig')) {
-                let functionHash = line
-                    .split(' == ')
-                    .find((piece: any) => !piece.includes('msg.sig'));
-                if (functionHash.includes('(')) {
-                    functionHash = functionHash.split('(')[1];
-                } else if (functionHash.includes(')')) {
-                    functionHash = functionHash.split(')')[0];
-                }
-                return '}\n\nfunction ' + parseFunction(functionHash) + ' {';
-            } else {
-                return line;
-            }
-        })
-        .join('\n');
-}
+import parseFunctions from '../utils/parseFunctions';
 
 class EVM {
     pc: any;
@@ -100,7 +79,7 @@ class EVM {
             this.run();
             pseudoInstructions = this.pseudoInstructions;
         }
-        return stringifyInstructions(pseudoInstructions, debug);
+        return parseFunctions(stringifyInstructions(pseudoInstructions, debug));
     }
 }
 
