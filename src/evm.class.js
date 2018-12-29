@@ -1,4 +1,4 @@
-const findOpcode = require('./utils/opcodes.js');
+const findOpcode = require('../node_modules/ethereumjs-vm/dist/opcodes.js');
 const parseFunction = require("./utils/functions.js");
 
 function stringifyInstructions(depthInstructions,debug = false,indentation = 0) {

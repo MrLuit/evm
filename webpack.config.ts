@@ -17,7 +17,7 @@ const config: Configuration = {
         libraryExport: 'default'
     },
     resolve: {
-        extensions: ['.ts']
+        extensions: ['.ts', '.js']
     },
     module: {
         rules: [
@@ -34,6 +34,11 @@ const config: Configuration = {
                     }
                 ],
                 exclude: /node_modules/
+            },
+            {
+                test: /\.js$/,
+                use: ['file-loader'],
+                include: /node_modules\/ethereumjs-vm\/dist\/opcodes\.js/
             }
         ]
     },
