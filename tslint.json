@@ -24,5 +24,11 @@
     "ordered-imports": false,
     "member-access": [true, "no-public"]
   },
+  "linterOptions": {
+    "exclude": [
+      "*.json",
+      "**/*.json"
+    ]
+  },
   "rulesDirectory": ["node_modules/tslint-microsoft-contrib"]
 }
