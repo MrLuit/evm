@@ -5,14 +5,15 @@ export default class Instruction {
     pc: number;
     description?: string;
     debugLevel: number;
-    halted?: boolean;
-    jump?: any;
+    halted: boolean;
+    jump: boolean | object;
 
     constructor(name: string, pc: number) {
         this.name = name;
         this.pc = pc;
         this.debugLevel = 2;
         this.halted = false;
+        this.jump = false;
     }
 
     halt(shouldHalt: boolean = true) {

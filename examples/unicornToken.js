@@ -1,8 +1,9 @@
 const Web3 = require('web3');
-const decompileBytecode = require("../");
+const EVM = require("../");
 const web3 = new Web3(new Web3.providers.HttpProvider("https://api.mycryptoapi.com/eth"));
 
 (async () => {
     const code = await web3.eth.getCode("0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7");
-    console.log(decompileBytecode(code));
+    const evm = new EVM(code);
+    console.log(evm.decompile());
 })();

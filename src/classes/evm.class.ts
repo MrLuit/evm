@@ -1,4 +1,5 @@
 const findOpcode = require('../../node_modules/ethereumjs-vm/dist/opcodes.js');
+import * as functionHashes from '../../data/functionHashes.json';
 import allOpcodes from '../utils/opcodes';
 import stringifyInstructions from '../utils/stringifyInstructions';
 import parseFunctions from '../utils/parseFunctions';
@@ -44,6 +45,14 @@ class EVM {
             }
         }
         return ops;
+    }
+
+    getFunctions() {
+        return this.getOpcodes()
+            .filter(opcode => opcode.name === 'PUSH4')
+            .map(opcode => opcode.pushData.toString('hex'))
+            .filter(hash => hash in functionHashes)
+            .map(hash => (functionHashes as any)[hash]);
     }
 
     clean() {
