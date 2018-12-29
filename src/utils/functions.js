@@ -1,4 +1,4 @@
-const functionHashes = require("./functionHashes.json");
+const functionHashes = require("../../data/functionHashes.json");
 
 module.exports = (functionHash) => {
     if(functionHash in functionHashes) {

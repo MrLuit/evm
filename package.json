@@ -10,8 +10,9 @@
     "tslint": "tslint --project .",
     "prepublishOnly": "npm run clean && npm run build:prod",
     "clean": "rimraf ./lib",
-    "build": "webpack",
-    "build:prod": "cross-env NODE_ENV=production webpack",
+    "build": "npm run build:functions && webpack",
+    "build:prod": "cross-env NODE_ENV=production npm run build",
+    "build:functions": "ts-node ./scripts/build.ts",
     "prettier:diff": "prettier --write --config ./.prettierrc --list-different 'src/**/*.ts'"
   },
   "repository": {
@@ -55,6 +56,10 @@
     "*.ts": [
       "prettier --write --config ./.prettierrc --config-precedence file-override",
       "tslint --project .",
+      "git add"
+    ],
+    "*.json": [
+      "npm run build:functions",
       "git add"
     ]
   },
