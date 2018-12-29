@@ -1,5 +1,5 @@
 const findOpcode = require('./utils/opcodes.js');
-const parseFunction = require("./utils/functions");
+const parseFunction = require("./utils/functions.js");
 
 function stringifyInstructions(depthInstructions,debug = false,indentation = 0) {
     let instructionLines = "";

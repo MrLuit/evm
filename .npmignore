@@ -17,7 +17,6 @@ bower_components
 build/Release
 node_modules/
 jspm_packages/
-typings/
 .npm
 .eslintcache
 .node_repl_history
@@ -25,7 +24,6 @@ typings/
 .yarn-integrity
 .env
 .next
-lib/
 
 # Webpack
 .awcache/

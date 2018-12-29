@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+      "target": "es6",
+      "module": "commonjs",
+      "allowSyntheticDefaultImports": true,
+      "declaration": true,
+      "declarationDir": "typings",
+      "sourceMap": true,
+      "outDir": "./lib",
+      "strict": true
+    },
+    "include": [
+      "./src/**/*.ts",
+      "./tests/**/*.ts",
+      "webpack.config.ts"
+    ]
+  }
