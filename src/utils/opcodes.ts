@@ -3,6 +3,7 @@ import ADD from '../opcodes/add';
 import MUL from '../opcodes/mul';
 import SUB from '../opcodes/sub';
 import DIV from '../opcodes/div';
+import MOD from '../opcodes/mod';
 import EXP from '../opcodes/exp';
 import LT from '../opcodes/lt';
 import GT from '../opcodes/gt';
@@ -10,6 +11,7 @@ import EQ from '../opcodes/eq';
 import ISZERO from '../opcodes/iszero';
 import AND from '../opcodes/and';
 import OR from '../opcodes/or';
+import XOR from '../opcodes/xor';
 import NOT from '../opcodes/not';
 import SHA3 from '../opcodes/sha3';
 import ADDRESS from '../opcodes/address';
@@ -58,6 +60,7 @@ export default {
     MUL,
     SUB,
     DIV,
+    MOD,
     EXP,
     LT,
     GT,
@@ -65,6 +68,7 @@ export default {
     ISZERO,
     AND,
     OR,
+    XOR,
     NOT,
     SHA3,
     ADDRESS,
