@@ -13,6 +13,7 @@ An ethereum virtual machine (EVM) bytecode decompiler
 * **getByteCode()** - _Get raw bytecode_
 * **getOpcodes()** - _Returns opcodes including pc and pushData (if included)_
 * **getFunctions()** - _Parse functions from their signatures in bytecode_
+* **getEvents()** - _Parse events from their signatures in bytecode_
 * **clean()** - _Reset the EVM state (stack, memory, etc.)_
 * **run()** - _Interpret opcodes by looping over them, returns array of interpreted opcodes_
 * **decompile()** - _Decompile bytecode to readable pseudocode_
@@ -30,6 +31,7 @@ web3.eth.getCode("0x06012c8cf97BEaD5deAe237070F9587f8E7A266d").then(code => {  /
     const evm = new EVM(code);
     console.log(evm.getOpcodes());  /* Get opcodes */
     console.log(evm.getFunctions());  /* Get functions */
+    console.log(evm.getEvents());  /* Get events */
     console.log(evm.decompile());  /* Decompile bytecode */
 });
 ```
@@ -43,6 +45,7 @@ web3.eth.getCode("0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359", function(err,code
     const evm = new window.EVM(code);
     console.log(evm.getOpcodes());  /* Get opcodes */
     console.log(evm.getFunctions());  /* Get functions */
+    console.log(evm.getEvents());  /* Get events */
     console.log(evm.decompile());  /* Decompile bytecode */
 });
 ```
