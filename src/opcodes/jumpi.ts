@@ -12,7 +12,14 @@ export default (opcode: any, state: any) => {
     );
     if (!(opcode.pc + ':' + parseInt(jumpLocation, 16) in state.jumps)) {
         state.jumps[opcode.pc + ':' + parseInt(jumpLocation, 16)] = true;
-        if (jumpIndex >= 0) {
+        const conditionParts = jumpCondition.split(' == ');
+        if (
+            conditionParts.length === 2 &&
+            conditionParts[0].replace(/\(/g, '') === conditionParts[1].replace(/\)/g, '')
+        ) {
+            instruction.setDebug();
+            state.pc = jumpIndex;
+        } else if (jumpIndex >= 0) {
             instruction.halt();
             instruction.setJump({
                 condition: jumpCondition,

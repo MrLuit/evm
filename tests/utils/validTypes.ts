@@ -1,4 +1,4 @@
-const types = ['bool', 'string', 'address'];
+const types = ['bool', 'string', 'address', 'bytes'];
 
 for (let i = 1; i <= 32; i++) {
     types.push('bytes' + i);

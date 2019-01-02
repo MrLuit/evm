@@ -30,6 +30,7 @@
     "05b34410": "creationDate()",
     "02d05d3f": "creator()",
     "313ce567": "decimals()",
+    "d0e30db0": "deposit()",
     "0b5ab3d5": "destroyDeed()",
     "666b7d32": "disableICO()",
     "126a710e": "dnsrr(bytes32)",
@@ -123,5 +124,6 @@
     "0900f010": "upgrade(address)",
     "3fa4f245": "value()",
     "3ccfd60b": "withdraw()",
+    "2e1a7d4d": "withdraw(uint256)",
     "5fd8c710": "withdrawBalance()"
 }

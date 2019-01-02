@@ -4,7 +4,10 @@ import MUL from '../opcodes/mul';
 import SUB from '../opcodes/sub';
 import DIV from '../opcodes/div';
 import MOD from '../opcodes/mod';
+import ADDMOD from '../opcodes/addmod';
+import MULMOD from '../opcodes/mulmod';
 import EXP from '../opcodes/exp';
+import SIGNEXTEND from '../opcodes/signextend';
 import LT from '../opcodes/lt';
 import GT from '../opcodes/gt';
 import EQ from '../opcodes/eq';
@@ -13,6 +16,10 @@ import AND from '../opcodes/and';
 import OR from '../opcodes/or';
 import XOR from '../opcodes/xor';
 import NOT from '../opcodes/not';
+import BYTE from '../opcodes/byte';
+import SHL from '../opcodes/shl';
+import SHR from '../opcodes/shr';
+import SAR from '../opcodes/sar';
 import SHA3 from '../opcodes/sha3';
 import ADDRESS from '../opcodes/address';
 import BALANCE from '../opcodes/balance';
@@ -22,11 +29,14 @@ import CALLVALUE from '../opcodes/callvalue';
 import CALLDATALOAD from '../opcodes/calldataload';
 import CALLDATASIZE from '../opcodes/calldatasize';
 import CALLDATACOPY from '../opcodes/calldatacopy';
+import CODESIZE from '../opcodes/codesize';
 import CODECOPY from '../opcodes/codecopy';
 import GASPRICE from '../opcodes/gasprice';
 import EXTCODESIZE from '../opcodes/extcodesize';
+import EXTCODECOPY from '../opcodes/extcodecopy';
 import RETURNDATASIZE from '../opcodes/returndatasize';
 import RETURNDATACOPY from '../opcodes/returndatacopy';
+import EXTCODEHASH from '../opcodes/extcodehash';
 import BLOCKHASH from '../opcodes/blockhash';
 import COINBASE from '../opcodes/coinbase';
 import TIMESTAMP from '../opcodes/timestamp';
@@ -48,8 +58,13 @@ import PUSH from '../opcodes/push';
 import DUP from '../opcodes/dup';
 import SWAP from '../opcodes/swap';
 import LOG from '../opcodes/log';
+import CREATE from '../opcodes/create';
 import CALL from '../opcodes/call';
+import CALLCODE from '../opcodes/callcode';
 import RETURN from '../opcodes/return';
+import DELEGATECALL from '../opcodes/delegatecall';
+import CREATE2 from '../opcodes/create2';
+import STATICCALL from '../opcodes/staticcall';
 import REVERT from '../opcodes/revert';
 import INVALID from '../opcodes/invalid';
 import SELFDESTRUCT from '../opcodes/selfdestruct';
@@ -60,16 +75,27 @@ export default {
     MUL,
     SUB,
     DIV,
+    SDIV: DIV,
     MOD,
+    SMOD: MOD,
+    ADDMOD,
+    MULMOD,
     EXP,
+    SIGNEXTEND,
     LT,
     GT,
+    SLT: LT,
+    SGT: GT,
     EQ,
     ISZERO,
     AND,
     OR,
     XOR,
     NOT,
+    BYTE,
+    SHL,
+    SHR,
+    SAR,
     SHA3,
     ADDRESS,
     BALANCE,
@@ -79,11 +105,14 @@ export default {
     CALLDATALOAD,
     CALLDATASIZE,
     CALLDATACOPY,
+    CODESIZE,
     CODECOPY,
     GASPRICE,
     EXTCODESIZE,
+    EXTCODECOPY,
     RETURNDATASIZE,
     RETURNDATACOPY,
+    EXTCODEHASH,
     BLOCKHASH,
     COINBASE,
     TIMESTAMP,
@@ -171,8 +200,13 @@ export default {
     LOG2: LOG,
     LOG3: LOG,
     LOG4: LOG,
+    CREATE,
     CALL,
+    CALLCODE,
     RETURN,
+    DELEGATECALL,
+    CREATE2,
+    STATICCALL,
     REVERT,
     INVALID,
     SELFDESTRUCT

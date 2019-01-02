@@ -5,7 +5,20 @@ export default (opcode: any, state: any) => {
     const stackItem2 = state.stack.pop();
     const instruction = new Instruction(opcode.name, opcode.pc);
     instruction.setDebug();
-    if (/^f*$/.test(stackItem1) || stackItem1 === '10000000000000000000000000000000000000000') {
+    if (!isNaN(parseInt(stackItem1, 16)) && !isNaN(parseInt(stackItem2, 16))) {
+        const result = Buffer.from(stackItem1, 'hex') && Buffer.from(stackItem2, 'hex');
+        state.stack.push(result.toString('hex'));
+        instruction.setDescription('stack.push(%s);', result.toString('hex'));
+    } else if (stackItem1 === '0') {
+        state.stack.push(stackItem2);
+        instruction.setDescription('stack.push(%s);', stackItem2);
+    } else if (stackItem2 === '0') {
+        state.stack.push(stackItem1);
+        instruction.setDescription('stack.push(%s);', stackItem1);
+    } else if (
+        /^f*$/.test(stackItem1) ||
+        stackItem1 === '10000000000000000000000000000000000000000'
+    ) {
         // Since type / length matching is not really useful for our use case, we won't include it
         state.stack.push(stackItem2);
         instruction.setDescription('stack.push(%s);', stackItem2);

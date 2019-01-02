@@ -5,7 +5,11 @@ export default (opcode: any, state: any) => {
     const stackItem2 = state.stack.pop();
     const instruction = new Instruction(opcode.name, opcode.pc);
     instruction.setDebug();
-    if (
+    if (!isNaN(parseInt(stackItem1, 16)) && !isNaN(parseInt(stackItem2, 16))) {
+        const result = (parseInt(stackItem1, 16) / parseInt(stackItem2, 16)).toString(16);
+        state.stack.push(result);
+        instruction.setDescription('stack.push(%s);', result);
+    } else if (
         stackItem1 === 'msg.data' &&
         (stackItem2 === '0100000000000000000000000000000000000000000000000000000000' ||
             stackItem2 === '100000000000000000000000000000000000000000000000000000000')
@@ -14,6 +18,9 @@ export default (opcode: any, state: any) => {
 
         state.stack.push('msg.sig');
         instruction.setDescription('stack.push(msg.sig);');
+    } else if (parseInt(stackItem2, 16) === 1) {
+        state.stack.push(stackItem1);
+        instruction.setDescription('stack.push(%s);', stackItem1);
     } else {
         state.stack.push('(' + stackItem1 + ' / ' + stackItem2 + ')');
         instruction.setDescription('stack.push(%s / %s);', stackItem1, stackItem2);

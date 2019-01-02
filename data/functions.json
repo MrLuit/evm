@@ -27,6 +27,7 @@
     "creationDate()",
     "creator()",
     "decimals()",
+    "deposit()",
     "destroyDeed()",
     "disableICO()",
     "dnsrr(bytes32)",
@@ -123,5 +124,6 @@
     "upgrade(address)",
     "value()",
     "withdraw()",
+    "withdraw(uint256)",
     "withdrawBalance()"
 ]

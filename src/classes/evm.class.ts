@@ -64,6 +64,12 @@ class EVM {
             .map(hash => (eventHashes as any)[hash]);
     }
 
+    getJumpDestinations() {
+        return this.getOpcodes()
+            .filter(opcode => opcode.name === 'JUMPDEST')
+            .map(opcode => opcode.pc);
+    }
+
     clean() {
         this.pc = 0;
         this.instructions = [];
@@ -77,13 +83,7 @@ class EVM {
         const opCodes = this.getOpcodes();
         for (this.pc; this.pc < opCodes.length; this.pc++) {
             const opCode = opCodes[this.pc];
-            //console.log(this.pc + ':' + opCode.pc + ' ' + Object.keys(this.jumps).length);
-            /*console.log(
-                opCode.pc +
-                    ': ' +
-                    opCode.name +
-                    (opCode.pushData ? ' 0x' + opCode.pushData.toString('hex') : '')
-            );*/
+            //console.log(opCode.pc + ': ' + opCode.name + ' ' + JSON.stringify(this.stack));
             if (!(opCode.name in allOpcodes)) {
                 throw new Error('Unknown OPCODE: ' + opCode.name);
             } else {
@@ -103,7 +103,17 @@ class EVM {
         if (this.instructions.length === 0) {
             this.run();
         }
-        return parseFunctions(stringifyInstructions(this.instructions, debug));
+        const events = this.getEvents();
+        const decompiledCode = parseFunctions(stringifyInstructions(this.instructions, debug));
+        if (events.length > 0) {
+            return (
+                events.map(event => 'event ' + event.replace(/,/g, ', ') + ';').join('\n') +
+                '\n\n' +
+                decompiledCode
+            );
+        } else {
+            return decompiledCode;
+        }
     }
 }
 

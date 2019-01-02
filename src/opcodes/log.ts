@@ -10,20 +10,38 @@ export default (opcode: any, state: any) => {
         topics.push(state.stack.pop());
     }
     const instruction = new Instruction(opcode.name, opcode.pc);
-    instruction.setDescription(
-        'log(memory[%s,(%s+%s)],%s);',
-        memoryStart,
-        memoryStart,
-        memoryLength,
-        topics
-            .map(topic => {
-                if (topic in eventHashes) {
-                    return (eventHashes as any)[topic];
-                } else {
-                    return topic;
-                }
-            })
-            .join(',')
-    );
+    if (topics.length > 0 && topics[0] in eventHashes) {
+        const fullEventName = (eventHashes as any)[topics[0]];
+        const eventName = fullEventName.split('(')[0];
+        topics.shift();
+        if (parseInt(memoryLength, 16) === 32 && memoryStart in state.memory) {
+            instruction.setDescription(
+                'emit ' +
+                    eventName.replace(/,/g, ', ') +
+                    '(' +
+                    [...topics, state.memory[memoryStart]].join(',') +
+                    ');'
+            );
+        } else {
+            instruction.setDescription(
+                'emit ' +
+                    eventName.replace(/,/g, ', ') +
+                    '(' +
+                    [
+                        ...topics,
+                        'memory[' + memoryStart + ',(' + memoryStart + '+' + memoryLength + ')]'
+                    ].join(',') +
+                    ');'
+            );
+        }
+    } else {
+        instruction.setDescription(
+            'log(memory[%s,(%s+%s)],%s);',
+            memoryStart,
+            memoryStart,
+            memoryLength,
+            topics.join(',')
+        );
+    }
     return instruction;
 };

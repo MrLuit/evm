@@ -6,12 +6,11 @@ export default (opcode: any, state: any) => {
     const instruction = new Instruction(opcode.name, opcode.pc);
     instruction.setDebug();
     instruction.setDescription(
-        'stack.push(%s ^ %s);',
-        stackItem1,
+        'stack.push((%s << (32-%s))) >> (32-%s));',
         stackItem2,
         stackItem1,
-        stackItem2
+        stackItem1
     );
-    state.stack.push('(' + stackItem1 + ' ^ ' + stackItem2 + ')');
+    state.stack.push('(' + stackItem2 + ' << (32-' + stackItem1 + ')) >> (32-' + stackItem1 + ')');
     return instruction;
 };
