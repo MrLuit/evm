@@ -12,8 +12,8 @@ export default (opcode: any, state: any) => {
         state.jumps[opcode.pc + ':' + parseInt(jumpLocation, 16)] = true;
         if (jumpIndex >= 0) {
             state.pc = jumpIndex;
+            instruction.setDebug();
         }
-        instruction.setDebug();
     }
     return instruction;
 };

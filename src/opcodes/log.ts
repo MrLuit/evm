@@ -1,4 +1,5 @@
 import Instruction from '../classes/instruction.class';
+import * as eventHashes from '../../data/eventHashes.json';
 
 export default (opcode: any, state: any) => {
     const topicsCount = parseInt(opcode.name.replace('LOG', ''), 10);
@@ -10,11 +11,19 @@ export default (opcode: any, state: any) => {
     }
     const instruction = new Instruction(opcode.name, opcode.pc);
     instruction.setDescription(
-        'log(memory[%s,(%s+%s)]%s);',
+        'log(memory[%s,(%s+%s)],%s);',
         memoryStart,
         memoryStart,
         memoryLength,
-        topics.join(',')
+        topics
+            .map(topic => {
+                if (topic in eventHashes) {
+                    return (eventHashes as any)[topic];
+                } else {
+                    return topic;
+                }
+            })
+            .join(',')
     );
     return instruction;
 };

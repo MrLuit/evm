@@ -68,6 +68,13 @@ class EVM {
         const opCodes = this.getOpcodes();
         for (this.pc; this.pc < opCodes.length; this.pc++) {
             const opCode = opCodes[this.pc];
+            //console.log(this.pc + ':' + opCode.pc + ' ' + Object.keys(this.jumps).length);
+            /*console.log(
+                opCode.pc +
+                    ': ' +
+                    opCode.name +
+                    (opCode.pushData ? ' 0x' + opCode.pushData.toString('hex') : '')
+            );*/
             if (!(opCode.name in allOpcodes)) {
                 throw new Error('Unknown OPCODE: ' + opCode.name);
             } else {
