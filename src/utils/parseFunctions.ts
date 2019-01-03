@@ -12,6 +12,7 @@ export default (stringifiedInstructions: any) => {
             functions['()'] = {
                 payable: false,
                 payableCheck: true,
+                visibility: 'external',
                 lines: []
             };
             currentFunction = '()';
@@ -36,6 +37,7 @@ export default (stringifiedInstructions: any) => {
             functions[functionHash] = {
                 payable: false,
                 payableCheck: true,
+                visibility: 'public',
                 lines: []
             };
             currentFunction = functionHash;
@@ -45,6 +47,7 @@ export default (stringifiedInstructions: any) => {
             functions['else()'] = {
                 payable: false,
                 payableCheck: true,
+                visibility: 'external',
                 lines: []
             };
             currentFunction = 'else()';
@@ -118,10 +121,10 @@ export default (stringifiedInstructions: any) => {
         Object.keys(functions)
             .map(
                 functionName =>
-                    'function' +
-                    (functionName === '()' ? '' : ' ') +
+                    'function ' +
                     functionName +
-                    (functions[functionName].payable ? ' payable' : '') +
+                    (functions[functionName].payable ? ' payable ' : ' ') +
+                    functions[functionName].visibility +
                     ' {\n' +
                     functions[functionName].lines.join('\n') +
                     '\n}\n\n'

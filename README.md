@@ -15,13 +15,15 @@ An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising
 
 ### Methods
 
-* **getByteCode()** - _Get raw bytecode_
+* **getBytecode()** - _Get raw bytecode (not really useful; same as input)_
 * **getOpcodes()** - _Returns opcodes including pc and pushData (if included)_
 * **getFunctions()** - _Parse functions from their signatures in bytecode_
 * **getEvents()** - _Parse events from their signatures in bytecode_
-* **clean()** - _Reset the EVM state (stack, memory, etc.)_
+* **getJumpDestinations()** - _Get array of program counters from JUMPDEST opcodes_
+* **getSwarmHash()** - _Get Swarm hash (if any) for contract metadata_
+* **reset()** - _Reset the EVM state (stack, memory, etc.)_
 * **run()** - _Interpret opcodes by looping over them, returns array of interpreted opcodes_
-* **decompile()** - _Decompile bytecode to readable pseudocode_
+* **decompile()** - _Decompile bytecode into readable [Solidity](https://en.wikipedia.org/wiki/Solidity)-like pseudocode_
 
 ## Example
 

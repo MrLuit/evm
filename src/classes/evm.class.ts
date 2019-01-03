@@ -8,33 +8,27 @@ import parseEvents from '../utils/parseEvents';
 import parseMappings from '../utils/parseMappings';
 
 class EVM {
-    pc: number;
-    instructions: object[];
-    stack: string[];
-    memory: object;
-    storage: object;
-    jumps: object;
-    code: Buffer;
-    mappings: any;
-    layer: number;
+    private pc: number;
+    private opcodes: any[];
+    private instructions: any[];
+    private stack: string[];
+    private memory: object;
+    private storage: object;
+    private jumps: object;
+    private code: Buffer;
+    private mappings: any;
+    private layer: number;
 
-    constructor(
-        code: string | Buffer,
-        pc = 0,
-        stack = [],
-        memory = {},
-        jumps = {},
-        mappings = {},
-        layer = 0
-    ) {
-        this.pc = pc;
+    constructor(code: string | Buffer) {
+        this.pc = 0;
+        this.opcodes = [];
         this.instructions = [];
-        this.stack = stack;
-        this.memory = memory;
+        this.stack = [];
+        this.memory = {};
         this.storage = {};
-        this.jumps = jumps;
-        this.mappings = mappings;
-        this.layer = layer;
+        this.jumps = {};
+        this.mappings = {};
+        this.layer = 0;
         if (code instanceof Buffer) {
             this.code = code;
         } else {
@@ -42,24 +36,38 @@ class EVM {
         }
     }
 
-    getByteCode() {
+    clone() {
+        const clone = new EVM(this.code);
+        clone.pc = this.pc;
+        clone.opcodes = this.opcodes;
+        clone.stack = [...this.stack];
+        clone.memory = { ...this.memory };
+        clone.storage = { ...this.storage };
+        clone.jumps = { ...this.jumps };
+        clone.mappings = this.mappings;
+        clone.layer = this.layer + 1;
+        return clone;
+    }
+
+    getBytecode() {
         return '0x' + this.code.toString('hex');
     }
 
     getOpcodes() {
-        const ops = [];
-        for (let index = 0; index < this.code.length; index++) {
-            const currentOp = findOpcode(this.code[index], true);
-            currentOp.pc = index;
-            ops.push(currentOp);
-            if (currentOp.name.startsWith('PUSH')) {
-                const pushDataLength = this.code[index] - 0x5f;
-                const pushData = this.code.slice(index + 1, index + pushDataLength + 1);
-                currentOp.pushData = pushData;
-                index += pushDataLength;
+        if (this.opcodes.length === 0) {
+            for (let index = 0; index < this.code.length; index++) {
+                const currentOp = findOpcode(this.code[index], true);
+                currentOp.pc = index;
+                this.opcodes.push(currentOp);
+                if (currentOp.name.startsWith('PUSH')) {
+                    const pushDataLength = this.code[index] - 0x5f;
+                    const pushData = this.code.slice(index + 1, index + pushDataLength + 1);
+                    currentOp.pushData = pushData;
+                    index += pushDataLength;
+                }
             }
         }
-        return ops;
+        return this.opcodes;
     }
 
     getFunctions() {
@@ -92,28 +100,48 @@ class EVM {
             .map(opcode => opcode.pc);
     }
 
-    clean() {
+    getTotalGas() {
+        return this.getOpcodes()
+            .map(opcode => opcode.fee)
+            .reduce((a: number, b: number) => a + b);
+    }
+
+    getSwarmHash() {
+        const regex = /a165627a7a72305820([a-f0-9]{64})0029$/;
+        const bytecode = this.getBytecode();
+        const match = bytecode.match(regex);
+        if (match && match[1]) {
+            return 'bzzr://' + match[1];
+        } else {
+            return false;
+        }
+    }
+
+    reset() {
         this.pc = 0;
         this.instructions = [];
         this.stack = [];
         this.memory = {};
         this.storage = {};
         this.jumps = {};
+        this.mappings = {};
     }
 
     run() {
-        const opCodes = this.getOpcodes();
-        for (this.pc; this.pc < opCodes.length; this.pc++) {
-            const opCode = opCodes[this.pc];
-            if (!(opCode.name in allOpcodes)) {
-                throw new Error('Unknown OPCODE: ' + opCode.name);
-            } else {
-                const result = (allOpcodes as any)[opCode.name](opCode, this);
-                this.instructions.push(result);
-                if (!result) {
-                    throw new Error('No result? ' + opCode);
-                } else if (result.halted) {
-                    break;
+        if (this.instructions.length === 0) {
+            const opCodes = this.getOpcodes();
+            for (this.pc; this.pc < opCodes.length; this.pc++) {
+                const opCode = opCodes[this.pc];
+                if (!(opCode.name in allOpcodes)) {
+                    throw new Error('Unknown OPCODE: ' + opCode.name);
+                } else {
+                    const result = (allOpcodes as any)[opCode.name](opCode, this);
+                    this.instructions.push(result);
+                    if (!result) {
+                        throw new Error('No result? ' + opCode);
+                    } else if (result.halted) {
+                        break;
+                    }
                 }
             }
         }
@@ -121,12 +149,10 @@ class EVM {
     }
 
     decompile(debug = false) {
-        if (this.instructions.length === 0) {
-            this.run();
-        }
+        const instructions = this.run();
         const events = parseEvents(this.getEvents());
         const decompiledCode = parseMappings(
-            parseFunctions(stringifyInstructions(this.instructions, debug)),
+            parseFunctions(stringifyInstructions(instructions, debug)),
             this.mappings
         );
         if (events) {
@@ -136,5 +162,7 @@ class EVM {
         }
     }
 }
+
+export { functionHashes, eventHashes };
 
 export default EVM;

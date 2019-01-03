@@ -31,27 +31,15 @@ export default (opcode: any, state: any) => {
             instruction.setDebug();
         } else if (jumpIndex >= 0) {
             instruction.halt();
+            const trueClone = state.clone();
+            trueClone.pc = jumpIndex;
+            const falseClone = state.clone();
+            falseClone.pc = state.pc + 1;
             instruction.setJump({
                 condition: jumpCondition,
                 location: parseInt(jumpLocation, 16),
-                true: new EVM(
-                    state.code,
-                    jumpIndex,
-                    JSON.parse(JSON.stringify(state.stack)),
-                    JSON.parse(JSON.stringify(state.memory)),
-                    JSON.parse(JSON.stringify(state.jumps)),
-                    state.mappings,
-                    state.layer + 1
-                ).run(),
-                false: new EVM(
-                    state.code,
-                    parseInt((state.pc + 1).toString(), 10),
-                    JSON.parse(JSON.stringify(state.stack)),
-                    JSON.parse(JSON.stringify(state.memory)),
-                    JSON.parse(JSON.stringify(state.jumps)),
-                    state.mappings,
-                    state.layer + 1
-                ).run()
+                true: trueClone.run(),
+                false: falseClone.run()
             });
         }
     }
