@@ -9,13 +9,8 @@ export default (opcode: any, state: any) => {
         const result = (parseInt(stackItem1, 16) / parseInt(stackItem2, 16)).toString(16);
         state.stack.push(result);
         instruction.setDescription('stack.push(%s);', result);
-    } else if (
-        stackItem1 === 'msg.data' &&
-        (stackItem2 === '0100000000000000000000000000000000000000000000000000000000' ||
-            stackItem2 === '100000000000000000000000000000000000000000000000000000000')
-    ) {
+    } else if (stackItem1 === 'msg.data' && parseInt(stackItem2, 16) === 2 ** 224) {
         /* msg.data contains 32 bytes (33 including 0x), stackItem2 contains 29 bytes; only the first 4 bytes (function signature) are left */
-
         state.stack.push('msg.sig');
         instruction.setDescription('stack.push(msg.sig);');
     } else if (parseInt(stackItem2, 16) === 1) {
