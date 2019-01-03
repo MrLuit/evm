@@ -19,7 +19,7 @@ export default (stringifiedInstructions: any) => {
             currentFunctionParamsMap = {};
             switchCase.push(line);
             switchCase.push('    return default;');
-        } else if (!line.startsWith(' ') && line.includes('msg.sig')) {
+        } else if (!line.startsWith(' ') && line.includes(' == ') && line.includes('msg.sig')) {
             let functionHash = line.split(' == ').find((piece: any) => !piece.includes('msg.sig'));
             if (functionHash.includes('(')) {
                 functionHash = functionHash.split('(')[1];
