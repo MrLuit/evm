@@ -5,7 +5,7 @@ import * as events from '../data/events.json';
 
 describe('events.json', () => {
     it('should not contain duplicates', () => {
-        expect([...new Set(events)]).to.deep.equal(events);
+        expect(events).to.deep.equal([...new Set(events)]);
     });
 
     it('entries should not contain spaces', () => {

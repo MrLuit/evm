@@ -5,7 +5,7 @@ import * as functions from '../data/functions.json';
 
 describe('functions.json', () => {
     it('should not contain duplicates', () => {
-        expect([...new Set(functions)]).to.deep.equal(functions);
+        expect(functions).to.deep.equal([...new Set(functions)]);
     });
 
     it('entries should not contain spaces', () => {
