@@ -4,6 +4,10 @@ import validTypes from './utils/validTypes';
 import * as functions from '../data/functions.json';
 
 describe('functions.json', () => {
+    it('should not contain duplicates', () => {
+        expect([...new Set(functions)]).to.deep.equal(functions);
+    });
+
     it('entries should not contain spaces', () => {
         expect(functions.filter(functionName => functionName.includes(' '))).to.deep.equal([]);
     });

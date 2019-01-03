@@ -4,6 +4,10 @@ import validTypes from './utils/validTypes';
 import * as events from '../data/events.json';
 
 describe('events.json', () => {
+    it('should not contain duplicates', () => {
+        expect([...new Set(events)]).to.deep.equal(events);
+    });
+
     it('entries should not contain spaces', () => {
         expect(events.filter(eventName => eventName.includes(' '))).to.deep.equal([]);
     });
