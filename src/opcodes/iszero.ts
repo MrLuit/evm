@@ -1,9 +1,5 @@
 import Instruction from '../classes/instruction.class';
-
-function isHex(h: any) {
-    const a = parseInt(h, 16);
-    return a.toString(16) === h;
-}
+import { isHex } from '../utils/hex';
 
 export default (opcode: any, state: any) => {
     const stackItem = state.stack.pop();
@@ -31,6 +27,12 @@ export default (opcode: any, state: any) => {
     } else if (stackItem.split(' != ').length === 2) {
         state.stack.push(stackItem.replace(' != ', ' == '));
         instruction.setDescription('stack.push(%s);', stackItem.replace(' != ', ' == '));
+    } else if (stackItem.split(' >= ').length === 2) {
+        state.stack.push(stackItem.replace(' >= ', ' < '));
+        instruction.setDescription('stack.push(%s);', stackItem.replace(' >= ', ' < '));
+    } else if (stackItem.split(' <= ').length === 2) {
+        state.stack.push(stackItem.replace(' <= ', ' > '));
+        instruction.setDescription('stack.push(%s);', stackItem.replace(' > ', ' <= '));
     } else if (stackItem.split(' > ').length === 2) {
         state.stack.push(stackItem.replace(' > ', ' <= '));
         instruction.setDescription('stack.push(%s);', stackItem.replace(' > ', ' <= '));

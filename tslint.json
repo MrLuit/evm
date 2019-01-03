@@ -22,6 +22,8 @@
     "no-var-requires": false,
     "comment-format": false,
     "ordered-imports": false,
+    "no-conditional-assignment": false,
+    "no-bitwise": false,
     "member-access": [true, "no-public"]
   },
   "linterOptions": {

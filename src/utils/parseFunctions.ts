@@ -3,12 +3,22 @@ import * as functionHashes from '../../data/functionHashes.json';
 
 export default (stringifiedInstructions: any) => {
     const functions: any = {};
-    const switchCase: any = [];
-    let currentFunction = '';
+    let switchCase: any = [];
+    let currentFunction: any = false;
     let currentFunctionParamsMap: any = false;
 
     stringifiedInstructions.split('\n').forEach((line: any) => {
-        if (!line.startsWith(' ') && line.includes('msg.sig')) {
+        if (line === 'if(msg.data.length == 0) {' || line === 'if(msg.data.length < 04) {') {
+            functions['()'] = {
+                payable: false,
+                payableCheck: true,
+                lines: []
+            };
+            currentFunction = '()';
+            currentFunctionParamsMap = {};
+            switchCase.push(line);
+            switchCase.push('    return default;');
+        } else if (!line.startsWith(' ') && line.includes('msg.sig')) {
             let functionHash = line.split(' == ').find((piece: any) => !piece.includes('msg.sig'));
             if (functionHash.includes('(')) {
                 functionHash = functionHash.split('(')[1];
@@ -23,15 +33,46 @@ export default (stringifiedInstructions: any) => {
             } else {
                 functionHash = functionHash + '()';
             }
-            functions[functionHash] = [];
+            functions[functionHash] = {
+                payable: false,
+                payableCheck: true,
+                lines: []
+            };
             currentFunction = functionHash;
             switchCase.push(line);
-            switchCase.push('    return ' + functionHash + ';');
+            switchCase.push('    return ' + functionHash.split('(')[0] + ';');
+        } else if (!line.startsWith(' ') && line === '} else {') {
+            functions['else()'] = {
+                payable: false,
+                payableCheck: true,
+                lines: []
+            };
+            currentFunction = 'else()';
+            currentFunctionParamsMap = {};
+            switchCase.push(line);
+            switchCase.push('    return else;');
         } else if (!line.startsWith(' ')) {
-            currentFunction = '';
+            currentFunction = false;
             currentFunctionParamsMap = false;
             switchCase.push(line);
-        } else if (currentFunction) {
+        } else if (
+            currentFunction !== false &&
+            functions[currentFunction].lines.length === 0 &&
+            functions[currentFunction].payableCheck
+        ) {
+            if (line !== '    require(msg.value == 0);') {
+                functions[currentFunction].payable = true;
+                let newLine = line;
+                Object.keys(currentFunctionParamsMap).forEach(key => {
+                    newLine = newLine.replace(
+                        new RegExp(key.replace('[', '\\[').replace(']', '\\]'), 'g'),
+                        currentFunctionParamsMap[key]
+                    );
+                });
+                functions[currentFunction].lines.push(newLine);
+            }
+            functions[currentFunction].payableCheck = false;
+        } else if (currentFunction !== false) {
             let newLine = line;
             Object.keys(currentFunctionParamsMap).forEach(key => {
                 newLine = newLine.replace(
@@ -39,20 +80,50 @@ export default (stringifiedInstructions: any) => {
                     currentFunctionParamsMap[key]
                 );
             });
-            functions[currentFunction].push(newLine);
+            functions[currentFunction].lines.push(newLine);
         } else {
             switchCase.push(line);
         }
     });
 
+    if (
+        '()' in functions &&
+        'else()' in functions &&
+        functions['()'].lines.join('\n') === functions['else()'].lines.join('\n')
+    ) {
+        switchCase = switchCase.map((switchCaseLine: string) =>
+            switchCaseLine.replace('    return else;', '    return default;')
+        );
+        delete functions['else()'];
+    }
+
+    switchCase = switchCase.filter((line: string) => line !== '');
+
+    if (
+        switchCase.every(
+            (line: string) =>
+                line.includes('if(msg.sig == ') ||
+                line.includes(' == msg.sig) {') ||
+                line === 'if(msg.data.length == 0) {' ||
+                line === 'if(msg.data.length < 04) {' ||
+                line === '} else {' ||
+                line === '}' ||
+                line.startsWith('    return ')
+        )
+    ) {
+        switchCase = [];
+    }
+
     return (
         Object.keys(functions)
             .map(
                 functionName =>
-                    'function ' +
+                    'function' +
+                    (functionName === '()' ? '' : ' ') +
                     functionName +
+                    (functions[functionName].payable ? ' payable' : '') +
                     ' {\n' +
-                    functions[functionName].join('\n') +
+                    functions[functionName].lines.join('\n') +
                     '\n}\n\n'
             )
             .join('') + switchCase.join('\n')

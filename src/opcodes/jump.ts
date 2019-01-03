@@ -5,13 +5,15 @@ export default (opcode: any, state: any) => {
     const instruction = new Instruction(opcode.name, opcode.pc);
     instruction.setDescription('goto(%s);', jumpLocation);
     const opcodes = state.getOpcodes();
-    const jumpIndex = opcodes.indexOf(
-        opcodes.find((o: any) => o.pc === parseInt(jumpLocation, 16))
-    );
+    const jumpLocationData = opcodes.find((o: any) => o.pc === parseInt(jumpLocation, 16));
+    const jumpIndex = opcodes.indexOf(jumpLocationData);
     if (!(opcode.pc + ':' + parseInt(jumpLocation, 16) in state.jumps)) {
         state.jumps[opcode.pc + ':' + parseInt(jumpLocation, 16)] = true;
-        if (jumpIndex >= 0) {
-            state.pc = jumpIndex;
+        if (!jumpLocationData || jumpLocationData.name !== 'JUMPDEST') {
+            instruction.halt();
+            instruction.setDescription('revert("Bad jump destination");');
+        } else if (jumpLocationData && jumpIndex >= 0 && jumpLocationData.name === 'JUMPDEST') {
+            state.pc = jumpIndex - 1;
             instruction.setDebug();
         }
     }

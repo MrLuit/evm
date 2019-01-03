@@ -16,21 +16,17 @@ export default (opcode: any, state: any) => {
         topics.shift();
         if (parseInt(memoryLength, 16) === 32 && memoryStart in state.memory) {
             instruction.setDescription(
-                'emit ' +
-                    eventName.replace(/,/g, ', ') +
-                    '(' +
-                    [...topics, state.memory[memoryStart]].join(',') +
-                    ');'
+                'emit ' + eventName + '(' + [...topics, state.memory[memoryStart]].join(', ') + ');'
             );
         } else {
             instruction.setDescription(
                 'emit ' +
-                    eventName.replace(/,/g, ', ') +
+                    eventName +
                     '(' +
                     [
                         ...topics,
                         'memory[' + memoryStart + ',(' + memoryStart + '+' + memoryLength + ')]'
-                    ].join(',') +
+                    ].join(', ') +
                     ');'
             );
         }
@@ -40,7 +36,7 @@ export default (opcode: any, state: any) => {
             memoryStart,
             memoryStart,
             memoryLength,
-            topics.join(',')
+            topics.join(', ')
         );
     }
     return instruction;

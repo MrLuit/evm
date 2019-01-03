@@ -7,10 +7,15 @@ export default (opcode: any, state: any) => {
     const instruction = new Instruction(opcode.name, opcode.pc);
     instruction.setDescription('if%s goto(%s);', jumpCondition, jumpLocation);
     const opcodes = state.getOpcodes();
-    const jumpIndex = opcodes.indexOf(
-        opcodes.find((o: any) => o.pc === parseInt(jumpLocation, 16))
-    );
-    if (!(opcode.pc + ':' + parseInt(jumpLocation, 16) in state.jumps)) {
+    const jumpLocationData = opcodes.find((o: any) => o.pc === parseInt(jumpLocation, 16));
+    const jumpIndex = opcodes.indexOf(jumpLocationData);
+    if (!jumpLocationData || jumpLocationData.name !== 'JUMPDEST') {
+        instruction.halt();
+        instruction.setDescription('revert("Bad jump destination");');
+    } else if (jumpCondition === '1') {
+        instruction.setDebug();
+        state.pc = jumpIndex;
+    } else if (!(opcode.pc + ':' + parseInt(jumpLocation, 16) in state.jumps)) {
         state.jumps[opcode.pc + ':' + parseInt(jumpLocation, 16)] = true;
         const conditionParts = jumpCondition.split(' == ');
         if (
@@ -19,6 +24,11 @@ export default (opcode: any, state: any) => {
         ) {
             instruction.setDebug();
             state.pc = jumpIndex;
+        } else if (jumpCondition === '1') {
+            instruction.setDebug();
+            state.pc = jumpIndex;
+        } else if (jumpCondition === '0') {
+            instruction.setDebug();
         } else if (jumpIndex >= 0) {
             instruction.halt();
             instruction.setJump({
@@ -29,14 +39,18 @@ export default (opcode: any, state: any) => {
                     jumpIndex,
                     JSON.parse(JSON.stringify(state.stack)),
                     JSON.parse(JSON.stringify(state.memory)),
-                    JSON.parse(JSON.stringify(state.jumps))
+                    JSON.parse(JSON.stringify(state.jumps)),
+                    state.mappings,
+                    state.layer + 1
                 ).run(),
                 false: new EVM(
                     state.code,
                     parseInt((state.pc + 1).toString(), 10),
                     JSON.parse(JSON.stringify(state.stack)),
                     JSON.parse(JSON.stringify(state.memory)),
-                    JSON.parse(JSON.stringify(state.jumps))
+                    JSON.parse(JSON.stringify(state.jumps)),
+                    state.mappings,
+                    state.layer + 1
                 ).run()
             });
         }

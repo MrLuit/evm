@@ -4,23 +4,24 @@ export const stringifyInstructions = (depthInstructions: any, debug = false, ind
     let instructionLines = '';
     depthInstructions.forEach((instruction: any) => {
         if (instruction.jump) {
-            const condition = instruction.jump.condition;
+            let condition = instruction.jump.condition;
+            if (!condition.startsWith('(') || !condition.endsWith(')')) {
+                condition = '(' + condition + ')';
+            }
             const falseInstructions = instruction.jump.false.filter((i: any) => i.debugLevel > 0);
             if (
                 falseInstructions.length === 1 &&
                 requireCodes.indexOf(falseInstructions[0].name) > -1 &&
                 !condition.includes('msg.sig')
             ) {
-                instructionLines +=
-                    ' '.repeat(indentation) + 'require' + instruction.jump.condition + ';\n';
+                instructionLines += ' '.repeat(indentation) + 'require' + condition + ';\n';
                 instructionLines += stringifyInstructions(
                     instruction.jump.true,
                     debug,
                     indentation
                 );
             } else if (falseInstructions.length === 1 && falseInstructions[0].jump) {
-                instructionLines +=
-                    ' '.repeat(indentation) + 'if' + instruction.jump.condition + ' {\n';
+                instructionLines += ' '.repeat(indentation) + 'if' + condition + ' {\n';
                 instructionLines += stringifyInstructions(
                     instruction.jump.true,
                     debug,
@@ -45,8 +46,7 @@ export const stringifyInstructions = (depthInstructions: any, debug = false, ind
                     instructionLines += '\n' + ' '.repeat(indentation) + '}\n';
                 }
             } else {
-                instructionLines +=
-                    ' '.repeat(indentation) + 'if' + instruction.jump.condition + ' {\n';
+                instructionLines += ' '.repeat(indentation) + 'if' + condition + ' {\n';
                 instructionLines += stringifyInstructions(
                     instruction.jump.true,
                     debug,

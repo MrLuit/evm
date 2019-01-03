@@ -4,6 +4,8 @@ import * as eventHashes from '../../data/eventHashes.json';
 import allOpcodes from '../utils/opcodes';
 import stringifyInstructions from '../utils/stringifyInstructions';
 import parseFunctions from '../utils/parseFunctions';
+import parseEvents from '../utils/parseEvents';
+import parseMappings from '../utils/parseMappings';
 
 class EVM {
     pc: number;
@@ -13,14 +15,26 @@ class EVM {
     storage: object;
     jumps: object;
     code: Buffer;
+    mappings: any;
+    layer: number;
 
-    constructor(code: string | Buffer, pc = 0, stack = [], memory = {}, jumps = {}) {
+    constructor(
+        code: string | Buffer,
+        pc = 0,
+        stack = [],
+        memory = {},
+        jumps = {},
+        mappings = {},
+        layer = 0
+    ) {
         this.pc = pc;
         this.instructions = [];
         this.stack = stack;
         this.memory = memory;
         this.storage = {};
         this.jumps = jumps;
+        this.mappings = mappings;
+        this.layer = layer;
         if (code instanceof Buffer) {
             this.code = code;
         } else {
@@ -49,19 +63,27 @@ class EVM {
     }
 
     getFunctions() {
-        return this.getOpcodes()
-            .filter(opcode => opcode.name === 'PUSH4')
-            .map(opcode => opcode.pushData.toString('hex'))
-            .filter(hash => hash in functionHashes)
-            .map(hash => (functionHashes as any)[hash]);
+        return [
+            ...new Set(
+                this.getOpcodes()
+                    .filter(opcode => opcode.name === 'PUSH4')
+                    .map(opcode => opcode.pushData.toString('hex'))
+                    .filter(hash => hash in functionHashes)
+                    .map(hash => (functionHashes as any)[hash])
+            )
+        ];
     }
 
     getEvents() {
-        return this.getOpcodes()
-            .filter(opcode => opcode.name === 'PUSH32')
-            .map(opcode => opcode.pushData.toString('hex'))
-            .filter(hash => hash in eventHashes)
-            .map(hash => (eventHashes as any)[hash]);
+        return [
+            ...new Set(
+                this.getOpcodes()
+                    .filter(opcode => opcode.name === 'PUSH32')
+                    .map(opcode => opcode.pushData.toString('hex'))
+                    .filter(hash => hash in eventHashes)
+                    .map(hash => (eventHashes as any)[hash])
+            )
+        ];
     }
 
     getJumpDestinations() {
@@ -83,7 +105,6 @@ class EVM {
         const opCodes = this.getOpcodes();
         for (this.pc; this.pc < opCodes.length; this.pc++) {
             const opCode = opCodes[this.pc];
-            //console.log(opCode.pc + ': ' + opCode.name + ' ' + JSON.stringify(this.stack));
             if (!(opCode.name in allOpcodes)) {
                 throw new Error('Unknown OPCODE: ' + opCode.name);
             } else {
@@ -103,14 +124,13 @@ class EVM {
         if (this.instructions.length === 0) {
             this.run();
         }
-        const events = this.getEvents();
-        const decompiledCode = parseFunctions(stringifyInstructions(this.instructions, debug));
-        if (events.length > 0) {
-            return (
-                events.map(event => 'event ' + event.replace(/,/g, ', ') + ';').join('\n') +
-                '\n\n' +
-                decompiledCode
-            );
+        const events = parseEvents(this.getEvents());
+        const decompiledCode = parseMappings(
+            parseFunctions(stringifyInstructions(this.instructions, debug)),
+            this.mappings
+        );
+        if (events) {
+            return events + '\n\n' + decompiledCode;
         } else {
             return decompiledCode;
         }
