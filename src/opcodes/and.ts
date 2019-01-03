@@ -1,14 +1,21 @@
 import Instruction from '../classes/instruction.class';
+import { isHex } from '../utils/hex';
 
 export default (opcode: any, state: any) => {
     const stackItem1 = state.stack.pop();
     const stackItem2 = state.stack.pop();
     const instruction = new Instruction(opcode.name, opcode.pc);
     instruction.setDebug();
-    if (!isNaN(parseInt(stackItem1, 16)) && !isNaN(parseInt(stackItem2, 16))) {
-        const result = Buffer.from(stackItem1, 'hex') && Buffer.from(stackItem2, 'hex');
-        state.stack.push(result.toString('hex'));
-        instruction.setDescription('stack.push(%s);', result.toString('hex'));
+    if (isHex(stackItem1) && isHex(stackItem2)) {
+        /* For some reason Buffer.from() sometimes fails in the browser */
+        try {
+            const result = Buffer.from(stackItem1, 'hex') && Buffer.from(stackItem2, 'hex');
+            state.stack.push(result.toString('hex'));
+            instruction.setDescription('stack.push(%s);', result.toString('hex'));
+        } catch (e) {
+            state.stack.push('(' + stackItem1 + ' && ' + stackItem2 + ')');
+            instruction.setDescription('stack.push(%s && %s);', stackItem1, stackItem2);
+        }
     } else if (stackItem1 === '0') {
         state.stack.push(stackItem2);
         instruction.setDescription('stack.push(%s);', stackItem2);
