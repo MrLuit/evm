@@ -1,6 +1,11 @@
 # EVM Bytecode Decompiler
-
-An ethereum virtual machine (EVM) bytecode decompiler
+[![](https://img.shields.io/travis/com/MrLuit/evm-bytecode-decompiler.svg?style=flat-square)](https://travis-ci.com/MrLuit/evm-bytecode-decompiler)
+[![](https://img.shields.io/github/package-json/v/MrLuit/evm-bytecode-decompiler.svg?style=flat-square)](https://github.com/MrLuit/evm-bytecode-decompiler/blob/master/package.json#L3)
+<a href="https://david-dm.org/MrLuit/evm-bytecode-decompiler">
+[![](https://img.shields.io/david/MrLuit/evm-bytecode-decompiler.svg?style=flat-square)](https://david-dm.org/MrLuit/evm-bytecode-decompiler)
+[![](https://img.shields.io/github/license/MrLuit/evm-bytecode-decompiler.svg?style=flat-square)](https://github.com/MrLuit/evm-bytecode-decompiler/blob/master/LICENSE)
+    
+An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising-the-ethereum-virtual-machine-58457e61ca15) bytecode decompiler
 
 ## Usage
 
