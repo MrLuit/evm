@@ -1,13 +1,15 @@
+import Stack from '../../src/classes/stack.class';
+
 export default class OpcodeTestFactory {
     name: string;
     pc: number;
-    stack: string[];
+    stack: Stack;
     pushData?: Buffer;
 
     constructor(name: string = 'TEST') {
         this.name = name;
         this.pc = 0;
-        this.stack = [];
+        this.stack = new Stack();
     }
 
     getOpcode() {
@@ -25,26 +27,22 @@ export default class OpcodeTestFactory {
     }
 
     getStack() {
-        return this.stack.reverse();
+        return this.stack.elements;
     }
 
     setName(name: string) {
         this.name = name;
-        return this;
     }
 
     setStack(stack: string[]) {
-        this.stack = stack.reverse();
-        return this;
+        this.stack.elements = stack;
     }
 
     setPushData(data: string) {
         this.pushData = Buffer.from(data.replace('0x', ''), 'hex');
-        return this;
     }
 
     run(opcodeFunction: any) {
-        opcodeFunction(this.getOpcode(), this.getState());
-        return this;
+        return opcodeFunction(this.getOpcode(), this.getState());
     }
 }

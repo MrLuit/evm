@@ -16,28 +16,23 @@ export default class Instruction {
         this.jump = false;
     }
 
-    halt(shouldHalt: boolean = true) {
+    halt(shouldHalt: boolean = true): void {
         this.halted = shouldHalt;
-        return this;
     }
 
-    setLevel(debugLevel: number) {
+    setLevel(debugLevel: number): void {
         this.debugLevel = debugLevel;
-        return this;
     }
 
-    setDebug() {
+    setDebug(): void {
         this.setLevel(0);
-        return this;
     }
 
-    setDescription(description: string, ...args: string[]) {
+    setDescription(description: string, ...args: string[]): void {
         this.description = util.format(description, ...args);
-        return this;
     }
 
-    setJump(jump: any) {
+    setJump(jump: any): void {
         this.jump = jump;
-        return this;
     }
 }

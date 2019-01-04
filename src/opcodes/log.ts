@@ -1,7 +1,9 @@
+import EVM from '../classes/evm.class';
+import Opcode from '../interfaces/opcode.interface';
 import Instruction from '../classes/instruction.class';
 import * as eventHashes from '../../data/eventHashes.json';
 
-export default (opcode: any, state: any) => {
+export default (opcode: Opcode, state: EVM): Instruction => {
     const topicsCount = parseInt(opcode.name.replace('LOG', ''), 10);
     const memoryStart = state.stack.pop();
     const memoryLength = state.stack.pop();

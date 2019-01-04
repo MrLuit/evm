@@ -1,7 +1,7 @@
 import 'mocha';
 import { expect } from 'chai';
-import validTypes from './utils/validTypes';
-import * as events from '../data/events.json';
+import validTypes from '../utils/validTypes';
+import * as events from '../../data/events.json';
 
 describe('events.json', () => {
     it('should not contain duplicates', () => {

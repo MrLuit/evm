@@ -1,21 +1,23 @@
 import EVM from '../classes/evm.class';
+import Opcode from '../interfaces/opcode.interface';
 import Instruction from '../classes/instruction.class';
 
-export default (opcode: any, state: any) => {
+export default (opcode: Opcode, state: EVM): Instruction => {
     const jumpLocation = state.stack.pop();
     const jumpCondition = state.stack.pop();
     const instruction = new Instruction(opcode.name, opcode.pc);
     instruction.setDescription('if%s goto(%s);', jumpCondition, jumpLocation);
     const opcodes = state.getOpcodes();
     const jumpLocationData = opcodes.find((o: any) => o.pc === parseInt(jumpLocation, 16));
-    const jumpIndex = opcodes.indexOf(jumpLocationData);
     if (!jumpLocationData || jumpLocationData.name !== 'JUMPDEST') {
         instruction.halt();
         instruction.setDescription('revert("Bad jump destination");');
     } else if (jumpCondition === '1') {
+        const jumpIndex = opcodes.indexOf(jumpLocationData);
         instruction.setDebug();
         state.pc = jumpIndex;
     } else if (!(opcode.pc + ':' + parseInt(jumpLocation, 16) in state.jumps)) {
+        const jumpIndex = opcodes.indexOf(jumpLocationData);
         state.jumps[opcode.pc + ':' + parseInt(jumpLocation, 16)] = true;
         const conditionParts = jumpCondition.split(' == ');
         if (

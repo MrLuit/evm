@@ -6,24 +6,31 @@ import stringifyInstructions from '../utils/stringifyInstructions';
 import parseFunctions from '../utils/parseFunctions';
 import parseEvents from '../utils/parseEvents';
 import parseMappings from '../utils/parseMappings';
+import Instruction from './instruction.class';
+import Opcode from '../interfaces/opcode.interface';
+import Stack from './stack.class';
+import Memory from '../interfaces/memory.interface';
+import Storage from '../interfaces/storage.interface';
+import Mappings from '../interfaces/mappings.interface';
+import Jumps from '../interfaces/jumps.interface';
 
 class EVM {
-    private pc: number;
-    private opcodes: any[];
-    private instructions: any[];
-    private stack: string[];
-    private memory: object;
-    private storage: object;
-    private jumps: object;
-    private code: Buffer;
-    private mappings: any;
-    private layer: number;
+    pc: number;
+    stack: Stack;
+    memory: Memory;
+    opcodes: Opcode[];
+    instructions: Instruction[];
+    storage: Storage;
+    jumps: Jumps;
+    code: Buffer;
+    mappings: Mappings;
+    layer: number;
 
     constructor(code: string | Buffer) {
         this.pc = 0;
         this.opcodes = [];
         this.instructions = [];
-        this.stack = [];
+        this.stack = new Stack();
         this.memory = {};
         this.storage = {};
         this.jumps = {};
@@ -36,11 +43,11 @@ class EVM {
         }
     }
 
-    clone() {
+    clone(): EVM {
         const clone = new EVM(this.code);
         clone.pc = this.pc;
         clone.opcodes = this.opcodes;
-        clone.stack = [...this.stack];
+        clone.stack = this.stack.clone();
         clone.memory = { ...this.memory };
         clone.storage = { ...this.storage };
         clone.jumps = { ...this.jumps };
@@ -49,11 +56,11 @@ class EVM {
         return clone;
     }
 
-    getBytecode() {
+    getBytecode(): string {
         return '0x' + this.code.toString('hex');
     }
 
-    getOpcodes() {
+    getOpcodes(): Opcode[] {
         if (this.opcodes.length === 0) {
             for (let index = 0; index < this.code.length; index++) {
                 const currentOp = findOpcode(this.code[index], true);
@@ -70,43 +77,43 @@ class EVM {
         return this.opcodes;
     }
 
-    getFunctions() {
+    getFunctions(): string[] {
         return [
             ...new Set(
                 this.getOpcodes()
                     .filter(opcode => opcode.name === 'PUSH4')
-                    .map(opcode => opcode.pushData.toString('hex'))
+                    .map(opcode => (opcode.pushData ? opcode.pushData.toString('hex') : ''))
                     .filter(hash => hash in functionHashes)
                     .map(hash => (functionHashes as any)[hash])
             )
         ];
     }
 
-    getEvents() {
+    getEvents(): string[] {
         return [
             ...new Set(
                 this.getOpcodes()
                     .filter(opcode => opcode.name === 'PUSH32')
-                    .map(opcode => opcode.pushData.toString('hex'))
+                    .map(opcode => (opcode.pushData ? opcode.pushData.toString('hex') : ''))
                     .filter(hash => hash in eventHashes)
                     .map(hash => (eventHashes as any)[hash])
             )
         ];
     }
 
-    getJumpDestinations() {
+    getJumpDestinations(): number[] {
         return this.getOpcodes()
             .filter(opcode => opcode.name === 'JUMPDEST')
             .map(opcode => opcode.pc);
     }
 
-    getTotalGas() {
+    getTotalGas(): number {
         return this.getOpcodes()
             .map(opcode => opcode.fee)
             .reduce((a: number, b: number) => a + b);
     }
 
-    getSwarmHash() {
+    getSwarmHash(): string | boolean {
         const regex = /a165627a7a72305820([a-f0-9]{64})0029$/;
         const bytecode = this.getBytecode();
         const match = bytecode.match(regex);
@@ -117,17 +124,17 @@ class EVM {
         }
     }
 
-    reset() {
+    reset(): void {
         this.pc = 0;
         this.instructions = [];
-        this.stack = [];
+        this.stack.reset();
         this.memory = {};
         this.storage = {};
         this.jumps = {};
         this.mappings = {};
     }
 
-    run() {
+    run(): Instruction[] {
         if (this.instructions.length === 0) {
             const opCodes = this.getOpcodes();
             for (this.pc; this.pc < opCodes.length; this.pc++) {
@@ -148,7 +155,7 @@ class EVM {
         return this.instructions;
     }
 
-    decompile(debug = false) {
+    decompile(debug = false): string {
         const instructions = this.run();
         const events = parseEvents(this.getEvents());
         const decompiledCode = parseMappings(

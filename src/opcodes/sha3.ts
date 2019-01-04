@@ -1,6 +1,8 @@
+import EVM from '../classes/evm.class';
+import Opcode from '../interfaces/opcode.interface';
 import Instruction from '../classes/instruction.class';
 
-export default (opcode: any, state: any) => {
+export default (opcode: Opcode, state: EVM): Instruction => {
     const memoryStart = state.stack.pop();
     const memoryLength = state.stack.pop();
     const instruction = new Instruction(opcode.name, opcode.pc);
@@ -12,7 +14,10 @@ export default (opcode: any, state: any) => {
             i < parseInt(memoryStart, 16) + parseInt(memoryLength, 16);
             i += 32
         ) {
-            const memoryIndex = '0'.repeat(2 - i.toString(16).length) + i.toString(16);
+            const memoryIndex =
+                i.toString(16).length <= 2
+                    ? '0'.repeat(2 - i.toString(16).length) + i.toString(16)
+                    : i.toString(16);
             if (memoryIndex in state.memory) {
                 memoryItems.push(state.memory[memoryIndex]);
             } else {

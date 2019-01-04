@@ -1,12 +1,9 @@
+import EVM from '../classes/evm.class';
+import Opcode from '../interfaces/opcode.interface';
 import Instruction from '../classes/instruction.class';
-import formatHex from '../utils/hex';
+import { isHex, default as formatHex } from '../utils/hex';
 
-function isHex(h: any) {
-    const a = parseInt(h, 16);
-    return a.toString(16) === h;
-}
-
-export default (opcode: any, state: any) => {
+export default (opcode: Opcode, state: EVM): Instruction => {
     const memoryStart = state.stack.pop();
     const memoryLength = state.stack.pop();
     const instruction = new Instruction(opcode.name, opcode.pc);

@@ -1,18 +1,12 @@
+import EVM from '../classes/evm.class';
+import Opcode from '../interfaces/opcode.interface';
 import Instruction from '../classes/instruction.class';
 
-export default (opcode: any, state: any) => {
+export default (opcode: Opcode, state: EVM): Instruction => {
     const swapLocation = parseInt(opcode.name.replace('SWAP', ''), 10);
-    const firstStackItem = state.stack[state.stack.length - 1];
-    const otherStackItem = state.stack[state.stack.length - (swapLocation + 1)];
     const instruction = new Instruction(opcode.name, opcode.pc);
     instruction.setDebug();
-    instruction.setDescription(
-        'stack[0] = %s; stack[%s] = %s;',
-        otherStackItem,
-        swapLocation.toString(),
-        firstStackItem
-    );
-    state.stack[state.stack.length - (swapLocation + 1)] = firstStackItem;
-    state.stack[state.stack.length - 1] = otherStackItem;
+    instruction.setDescription('stack.swap(0, %s);', swapLocation.toString());
+    state.stack.swap(swapLocation);
     return instruction;
 };
