@@ -163,6 +163,4 @@ class EVM {
     }
 }
 
-export { functionHashes, eventHashes };
-
 export default EVM;

@@ -13,6 +13,7 @@ export default (opcode: any, state: any) => {
             instruction.halt();
             instruction.setDescription('revert("Bad jump destination");');
         } else if (jumpLocationData && jumpIndex >= 0 && jumpLocationData.name === 'JUMPDEST') {
+            instruction.setDescription('goto(%s);', parseInt(jumpLocation, 16).toString());
             state.pc = jumpIndex - 1;
             instruction.setDebug();
         }
