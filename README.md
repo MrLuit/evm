@@ -1,15 +1,20 @@
 # EVM Bytecode Decompiler
-[![](https://img.shields.io/travis/com/MrLuit/evm-bytecode-decompiler.svg?style=flat-square)](https://travis-ci.com/MrLuit/evm-bytecode-decompiler)
-[![](https://img.shields.io/github/package-json/v/MrLuit/evm-bytecode-decompiler.svg?style=flat-square)](https://github.com/MrLuit/evm-bytecode-decompiler/blob/master/package.json#L3)
-<a href="https://david-dm.org/MrLuit/evm-bytecode-decompiler">
-[![](https://img.shields.io/david/MrLuit/evm-bytecode-decompiler.svg?style=flat-square)](https://david-dm.org/MrLuit/evm-bytecode-decompiler)
-[![](https://img.shields.io/github/license/MrLuit/evm-bytecode-decompiler.svg?style=flat-square)](https://github.com/MrLuit/evm-bytecode-decompiler/blob/master/LICENSE)
+[![](https://img.shields.io/travis/com/MrLuit/evm-utils.svg?style=flat-square)](https://travis-ci.com/MrLuit/evm-utils)
+[![](https://img.shields.io/github/npm/v/npm/evm-utils.svg?style=flat-square)](https://www.npmjs.com/package/evm-utils)
+<a href="https://david-dm.org/MrLuit/evm-utils">
+[![](https://img.shields.io/david/MrLuit/evm-utils.svg?style=flat-square)](https://david-dm.org/MrLuit/evm-utils)
+[![](https://img.shields.io/github/license/MrLuit/evm-utils.svg?style=flat-square)](https://github.com/MrLuit/evm-utils/blob/master/LICENSE)
     
-An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising-the-ethereum-virtual-machine-58457e61ca15) bytecode decompiler
+An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising-the-ethereum-virtual-machine-58457e61ca15) interpreter, decompiler, along with several other utils for programmatically extracting information from bytecode.
 
 ## Usage
 
-> npm i evm-bytecode-decompiler
+> npm i evm-utils
+
+## Features
+- Converting bytecode to opcodes
+- Reading information like events / functions from either bytecode or tx data
+- Extracting the swarm hash from bytecode
 
 ## API
 
@@ -20,7 +25,7 @@ An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising
 * **getFunctions()** - _Parse functions from their signatures in bytecode_
 * **getEvents()** - _Parse events from their signatures in bytecode_
 * **getJumpDestinations()** - _Get array of program counters from JUMPDEST opcodes_
-* **getSwarmHash()** - _Get Swarm hash (if any) for contract metadata_
+* **getSwarmHash()** - _Get [Swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (if any) for [contract metadata](https://solidity.readthedocs.io/en/v0.5.2/metadata.html)_
 * **reset()** - _Reset the EVM state (stack, memory, etc.)_
 * **run()** - _Interpret opcodes by looping over them, returns array of interpreted opcodes_
 * **decompile()** - _Decompile bytecode into readable [Solidity](https://en.wikipedia.org/wiki/Solidity)-like pseudocode_
@@ -30,7 +35,7 @@ An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising
 ### Node.js
 
 ```javascript
-const EVM = require("evm-bytecode-decompiler");
+const EVM = require("evm-utils");
 const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.HttpProvider("https://api.mycryptoapi.com/eth"));
 

@@ -1,6 +1,7 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
 import Instruction from '../classes/instruction.class';
+import * as BigNumber from 'big-integer';
 import { isHex } from '../utils/hex';
 
 export default (opcode: Opcode, state: EVM): Instruction => {
@@ -9,15 +10,11 @@ export default (opcode: Opcode, state: EVM): Instruction => {
     const instruction = new Instruction(opcode.name, opcode.pc);
     instruction.setDebug();
     if (isHex(stackItem1) && isHex(stackItem2)) {
-        /* For some reason Buffer.from() sometimes fails in the browser */
-        try {
-            const result = Buffer.from(stackItem1, 'hex') && Buffer.from(stackItem2, 'hex');
-            state.stack.push(result.toString('hex'));
-            instruction.setDescription('stack.push(%s);', result.toString('hex'));
-        } catch (e) {
-            state.stack.push('(' + stackItem1 + ' && ' + stackItem2 + ')');
-            instruction.setDescription('stack.push(%s && %s);', stackItem1, stackItem2);
-        }
+        const result = BigNumber(stackItem1, 16)
+            .and(BigNumber(stackItem2, 16))
+            .toString(16);
+        state.stack.push(result);
+        instruction.setDescription('stack.push(%s);', result);
     } else if (stackItem1 === '0') {
         state.stack.push(stackItem2);
         instruction.setDescription('stack.push(%s);', stackItem2);

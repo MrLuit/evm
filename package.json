@@ -1,6 +1,6 @@
 {
-  "name": "evm-bytecode-decompiler",
-  "version": "0.0.1",
+  "name": "evm-utils",
+  "version": "0.1.0",
   "description": "An ethereum virtual machine (EVM) bytecode decompiler",
   "main": "lib/EVM.node.js",
   "module": "lib/EVM.js",
@@ -18,23 +18,26 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MrLuit/evm-bytecode-decompiler.git"
+    "url": "git+https://github.com/MrLuit/evm-utils.git"
   },
   "author": "Luit",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/MrLuit/evm-bytecode-decompiler/issues"
+    "url": "https://github.com/MrLuit/evm-utils/issues"
   },
-  "homepage": "https://github.com/MrLuit/evm-bytecode-decompiler#readme",
+  "homepage": "https://github.com/MrLuit/evm-utils#readme",
   "keywords": [
     "ethereum",
     "evm",
+    "utils",
     "decompiler",
     "typescript",
     "bytecode",
     "solidity"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "big-integer": "1.6.40"
+  },
   "devDependencies": {
     "@babel/core": "7.2.2",
     "@babel/preset-env": "7.2.3",

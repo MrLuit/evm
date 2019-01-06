@@ -1,7 +1,8 @@
 import mapFunctionParams from './functionParameters';
 import * as functionHashes from '../../data/functionHashes.json';
 
-export default (stringifiedInstructions: any) => {
+export default (stringifiedInstructions: string, returnEarly?: boolean) => {
+    const variables: any = [];
     const functions: any = {};
     let switchCase: any = [];
     let currentFunction: any = false;
@@ -20,6 +21,7 @@ export default (stringifiedInstructions: any) => {
             switchCase.push(line);
             switchCase.push('    return default;');
         } else if (!line.startsWith(' ') && line.includes(' == ') && line.includes('msg.sig')) {
+            let plainFunctionName;
             let functionHash = line.split(' == ').find((piece: any) => !piece.includes('msg.sig'));
             if (functionHash.includes('(')) {
                 functionHash = functionHash.split('(')[1];
@@ -28,13 +30,16 @@ export default (stringifiedInstructions: any) => {
             }
             if (functionHash in functionHashes) {
                 functionHash = (functionHashes as any)[functionHash];
+                plainFunctionName = functionHash;
                 const mappedFunctionParams = mapFunctionParams(functionHash);
                 functionHash = mappedFunctionParams.function;
                 currentFunctionParamsMap = mappedFunctionParams.map;
             } else {
                 functionHash = functionHash + '()';
+                plainFunctionName = null;
             }
             functions[functionHash] = {
+                function: plainFunctionName,
                 payable: false,
                 payableCheck: true,
                 visibility: 'public',
@@ -89,6 +94,11 @@ export default (stringifiedInstructions: any) => {
         }
     });
 
+    if (returnEarly) {
+        delete functions['else()'];
+        return functions;
+    }
+
     if (
         '()' in functions &&
         'else()' in functions &&
@@ -99,6 +109,26 @@ export default (stringifiedInstructions: any) => {
         );
         delete functions['else()'];
     }
+
+    Object.keys(functions).forEach(key => {
+        if (
+            functions[key].lines.length === 1 &&
+            /^return storage\[0x[a-f0-9]{2}\];$/.test(functions[key].lines[0].trim())
+        ) {
+            const storageVar = functions[key].lines[0]
+                .trim()
+                .substr(7)
+                .slice(0, -1);
+            const varName = key.split('(')[0];
+            variables.push(varName);
+            Object.keys(functions).forEach(key2 => {
+                functions[key2].lines = functions[key2].lines.map((line: string) =>
+                    line.replace(storageVar, varName)
+                );
+            });
+            delete functions[key];
+        }
+    });
 
     switchCase = switchCase.filter((line: string) => line !== '');
 
@@ -118,6 +148,8 @@ export default (stringifiedInstructions: any) => {
     }
 
     return (
+        variables.map((varr: string) => 'public ' + varr + ';').join('\n') +
+        (variables.length > 0 ? '\n\n' : '') +
         Object.keys(functions)
             .map(
                 functionName =>
@@ -129,6 +161,7 @@ export default (stringifiedInstructions: any) => {
                     functions[functionName].lines.join('\n') +
                     '\n}\n\n'
             )
-            .join('') + switchCase.join('\n')
+            .join('') +
+        switchCase.join('\n')
     );
 };

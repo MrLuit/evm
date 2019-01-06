@@ -1,7 +1,7 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
 import Instruction from '../classes/instruction.class';
-import { isHex, default as formatHex } from '../utils/hex';
+import { isHex, pad32, default as formatHex } from '../utils/hex';
 
 export default (opcode: Opcode, state: EVM): Instruction => {
     const memoryStart = state.stack.pop();
@@ -9,7 +9,6 @@ export default (opcode: Opcode, state: EVM): Instruction => {
     const instruction = new Instruction(opcode.name, opcode.pc);
     instruction.halt();
     if (isHex(memoryStart) && isHex(memoryLength)) {
-        //console.log(state.memory);
         const memoryItems = [];
         for (
             let i = parseInt(memoryStart, 16);
@@ -23,20 +22,17 @@ export default (opcode: Opcode, state: EVM): Instruction => {
                 memoryItems.push('memory[0x' + memoryIndex + ']');
             }
         }
-        /*const stringifiedMemoryItems = memoryItems.reduce((a: any,b: any) => {
-            if(!isNaN(parseInt(a,16)) && !isNaN(parseInt(b,16))) {
-                return (parseInt(a,16)+parseInt(b,16)).toString(16);
-            } else {
-                return false;
-            }
-        });*/
-        const stringifiedMemoryItems = false;
-        instruction.setDescription(
-            'return %s;',
-            stringifiedMemoryItems
-                ? formatHex(stringifiedMemoryItems)
-                : memoryItems.map(i => formatHex(i)).join(' + ')
-        );
+        if (memoryItems.every(item => !isNaN(parseInt(item, 16)))) {
+            instruction.setDescription(
+                'return %s;',
+                formatHex(memoryItems.map(i => pad32(i.toString())).join(''))
+            );
+        } else {
+            instruction.setDescription(
+                'return %s;',
+                formatHex(memoryItems.map(i => formatHex(i)).join(' + '))
+            );
+        }
     } else {
         instruction.setDescription(
             'return memory[0x%s:(0x%s+0x%s)];',
