@@ -8,8 +8,10 @@ describe('functions.json', () => {
         expect(functions).to.deep.equal([...new Set(functions)]);
     });
 
-    it('entries should not contain spaces', () => {
-        expect(functions.filter(functionName => functionName.includes(' '))).to.deep.equal([]);
+    it('entries should not contain spaces (`storage` being an exception)', () => {
+        expect(
+            functions.filter(functionName => functionName.replace(/ storage/g, '').includes(' '))
+        ).to.deep.equal([]);
     });
 
     it('entries should not contain semicolons', () => {
@@ -19,7 +21,7 @@ describe('functions.json', () => {
     it('entries should be formatted correctly using `function(...arguments)` (example: `balanceOf(address)`)', () => {
         expect(
             functions.filter(
-                functionName => !functionName.match(/^[a-zA-Z0-9_]+\([a-zA-Z0-9,\[\]]*\)$/)
+                functionName => !functionName.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,._ \[\]\(\)]*\)$/)
             )
         ).to.deep.equal([]);
     });
@@ -46,11 +48,15 @@ describe('functions.json', () => {
                 ).to.not.include('byte');
                 expect(
                     functionArguments.filter(
-                        functionArgument => validTypes.indexOf(functionArgument) === -1
+                        functionArgument =>
+                            validTypes.indexOf(functionArgument) === -1 &&
+                            functionArgument.charAt(0).toUpperCase() !== functionArgument.charAt(0)
                     ),
                     functionName
                 ).to.deep.equal([]);
             }
         });
-    });
+    })
+        .timeout(20000)
+        .slow(10000);
 });
