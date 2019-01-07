@@ -1,49 +1,40 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
 import Instruction from '../classes/instruction.class';
-import { isHex } from '../utils/hex';
+import * as BigNumber from '../../node_modules/big-integer';
+import stringify from '../utils/stringify';
+
+export class ISZERO {
+    readonly type: string;
+    readonly static: boolean;
+    readonly item: any;
+
+    constructor(item: any) {
+        this.type = 'ISZERO';
+        this.static = false;
+        this.item = item;
+    }
+
+    toString() {
+        return stringify(this.item) + ' == 0';
+    }
+}
 
 export default (opcode: Opcode, state: EVM): Instruction => {
-    const stackItem = state.stack.pop();
+    const item = state.stack.pop();
     const instruction = new Instruction(opcode.name, opcode.pc);
-    instruction.setDebug();
-    if (isHex(stackItem)) {
-        if (parseInt(stackItem, 16) === 0) {
-            state.stack.push('1');
-            instruction.setDescription('stack.push(1);');
-        } else {
-            state.stack.push('0');
-            instruction.setDescription('stack.push(0);');
-        }
-    } else if (
-        stackItem.startsWith('(') &&
-        stackItem.endsWith(' == 0)') &&
-        stackItem.split(' == 0').length === 2
-    ) {
-        /* ((x == 0) == 0) -> x */
-        state.stack.push(stackItem.split(' == 0')[0].substr(1));
-        instruction.setDescription('stack.push(%s);', stackItem.split(' == 0')[0].substr(1));
-    } else if (stackItem.split(' == ').length === 2) {
-        state.stack.push(stackItem.replace(' == ', ' != '));
-        instruction.setDescription('stack.push(%s);', stackItem.replace(' == ', ' != '));
-    } else if (stackItem.split(' != ').length === 2) {
-        state.stack.push(stackItem.replace(' != ', ' == '));
-        instruction.setDescription('stack.push(%s);', stackItem.replace(' != ', ' == '));
-    } else if (stackItem.split(' >= ').length === 2) {
-        state.stack.push(stackItem.replace(' >= ', ' < '));
-        instruction.setDescription('stack.push(%s);', stackItem.replace(' >= ', ' < '));
-    } else if (stackItem.split(' <= ').length === 2) {
-        state.stack.push(stackItem.replace(' <= ', ' > '));
-        instruction.setDescription('stack.push(%s);', stackItem.replace(' > ', ' <= '));
-    } else if (stackItem.split(' > ').length === 2) {
-        state.stack.push(stackItem.replace(' > ', ' <= '));
-        instruction.setDescription('stack.push(%s);', stackItem.replace(' > ', ' <= '));
-    } else if (stackItem.split(' < ').length === 2) {
-        state.stack.push(stackItem.replace(' < ', ' >= '));
-        instruction.setDescription('stack.push(%s);', stackItem.replace(' < ', ' >= '));
+    if (BigNumber.isInstance(item)) {
+        state.stack.push(BigNumber(item.isZero() === true ? 1 : 0));
+    } else if (item instanceof ISZERO) {
+        state.stack.push(item.item);
     } else {
-        state.stack.push('(' + stackItem + ' == 0' + ')');
-        instruction.setDescription('stack.push(' + stackItem + ' == 0);');
+        state.stack.push(new ISZERO(item));
     }
+    /* == -> != */
+    /* != -> == */
+    /* > -> <= */
+    /* <= -> > */
+    /* < -> >= */
+    /* >= -> < */
     return instruction;
 };

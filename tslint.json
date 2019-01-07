@@ -24,6 +24,7 @@
     "ordered-imports": false,
     "no-conditional-assignment": false,
     "no-bitwise": false,
+    "max-classes-per-file": false,
     "member-access": [true, "no-public"]
   },
   "linterOptions": {

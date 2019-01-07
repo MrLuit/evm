@@ -1,3 +1,3 @@
 export default interface Memory {
-    [key: string]: string;
+    [key: string]: any;
 }

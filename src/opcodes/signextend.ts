@@ -1,18 +1,27 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
 import Instruction from '../classes/instruction.class';
+import { SHL } from './shl';
+import { SAR } from './sar';
+import { SUB } from './sub';
+import * as BigNumber from '../../node_modules/big-integer';
 
 export default (opcode: Opcode, state: EVM): Instruction => {
-    const stackItem1 = state.stack.pop();
-    const stackItem2 = state.stack.pop();
+    const left = state.stack.pop();
+    const right = state.stack.pop();
     const instruction = new Instruction(opcode.name, opcode.pc);
-    instruction.setDebug();
-    instruction.setDescription(
-        'stack.push((%s << (32-%s))) >> (32-%s));',
-        stackItem2,
-        stackItem1,
-        stackItem1
-    );
-    state.stack.push('(' + stackItem2 + ' << (32-' + stackItem1 + ')) >> (32-' + stackItem1 + ')');
+    if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
+        state.stack.push(
+            right.shiftLeft(BigNumber(32).subtract(left)).shiftRight(BigNumber(32).subtract(left))
+        );
+    } else if (BigNumber.isInstance(left)) {
+        state.stack.push(
+            new SAR(new SHL(right, BigNumber(32).subtract(left)), BigNumber(32).subtract(left))
+        );
+    } else {
+        state.stack.push(
+            new SAR(new SHL(right, new SUB(BigNumber(32), left)), new SUB(BigNumber(32), left))
+        );
+    }
     return instruction;
 };

@@ -1,11 +1,11 @@
 export default class Stack {
-    elements: string[];
+    elements: any[];
 
     constructor() {
         this.elements = [];
     }
 
-    push(item: string): void {
+    push(item: any): void {
         if (this.elements.length >= 1024) {
             throw new Error('Stack too deep');
         } else {
@@ -13,11 +13,11 @@ export default class Stack {
         }
     }
 
-    pop(): string {
+    pop(): any {
         if (this.elements.length === 0) {
             throw new Error('POP with empty stack');
         } else {
-            return this.elements.shift()!;
+            return this.elements.shift();
         }
     }
 

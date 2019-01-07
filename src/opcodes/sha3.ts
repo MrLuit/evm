@@ -1,50 +1,53 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
 import Instruction from '../classes/instruction.class';
+import { MLOAD } from './mload';
+import * as BigNumber from '../../node_modules/big-integer';
+import stringify from '../utils/stringify';
+
+export class SHA3 {
+    readonly type: string;
+    readonly static: boolean;
+    readonly memoryStart?: any;
+    readonly memoryLength?: any;
+    readonly items: any;
+
+    constructor(items: any, memoryStart?: any, memoryLength?: any) {
+        this.type = 'SHA3';
+        this.static = true;
+        if (memoryStart && memoryLength) {
+            this.memoryStart = memoryStart;
+            this.memoryLength = memoryLength;
+        } else {
+            this.items = items;
+        }
+    }
+
+    toString() {
+        return 'keccak256(' + this.items.map((item: any) => stringify(item)).join(', ') + ')';
+    }
+}
 
 export default (opcode: Opcode, state: EVM): Instruction => {
     const memoryStart = state.stack.pop();
     const memoryLength = state.stack.pop();
     const instruction = new Instruction(opcode.name, opcode.pc);
-    instruction.setDebug();
-    if (!isNaN(parseInt(memoryStart, 16)) && !isNaN(parseInt(memoryLength, 16))) {
-        const memoryItems = [];
+    if (BigNumber.isInstance(memoryStart) && BigNumber.isInstance(memoryLength)) {
+        const items = [];
         for (
-            let i = parseInt(memoryStart, 16);
-            i < parseInt(memoryStart, 16) + parseInt(memoryLength, 16);
+            let i = memoryStart.toJSNumber();
+            i < memoryStart.add(memoryLength).toJSNumber();
             i += 32
         ) {
-            const memoryIndex =
-                i.toString(16).length <= 2
-                    ? '0'.repeat(2 - i.toString(16).length) + i.toString(16)
-                    : i.toString(16);
-            if (memoryIndex in state.memory) {
-                memoryItems.push(state.memory[memoryIndex]);
+            if (i in state.memory) {
+                items.push(state.memory[i]);
             } else {
-                memoryItems.push('memory[0x' + memoryIndex + ']');
+                items.push(new MLOAD(i));
             }
         }
-        state.stack.push('keccak256(' + memoryItems.join(' + ') + ')');
-        instruction.setDescription('keccak256(%s);', memoryItems.join(' + '));
-    } else if (memoryStart === '00') {
-        state.stack.push('keccak256(memory[0x00:0x' + memoryLength + '])');
-        instruction.setDescription('stack.push(keccak256(memory[0x00:0x%s]));', memoryLength);
+        state.stack.push(new SHA3(items));
     } else {
-        state.stack.push(
-            'keccak256(memory[0x' +
-                memoryStart +
-                ':(0x' +
-                memoryStart +
-                '+0x' +
-                memoryLength +
-                ')])'
-        );
-        instruction.setDescription(
-            'stack.push(keccak256(memory[0x%s:(0x%s+0x%s)]));',
-            memoryStart,
-            memoryStart,
-            memoryLength
-        );
+        state.stack.push(new SHA3([], memoryStart, memoryLength));
     }
     return instruction;
 };

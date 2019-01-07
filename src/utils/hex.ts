@@ -1,4 +1,4 @@
-function hex2a(hexx: any) {
+export function hex2a(hexx: any) {
     const hex = hexx.toString();
     let str = '';
     for (let i = 0; i < hex.length && hex.substr(i, 2) !== '00'; i += 2) {

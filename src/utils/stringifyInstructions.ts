@@ -1,38 +1,14 @@
-const requireCodes = ['REVERT', 'INVALID'];
-
-export const stringifyInstructions = (depthInstructions: any, debug = false, indentation = 0) => {
+export const stringifyInstructions = (instructionTree: any, indentation = 0): string => {
     let instructionLines = '';
-    depthInstructions.forEach((instruction: any) => {
-        if (instruction.jump) {
-            let condition = instruction.jump.condition;
-            if (!condition.startsWith('(') || !condition.endsWith(')')) {
-                condition = '(' + condition + ')';
-            }
-            const falseInstructions = instruction.jump.false.filter((i: any) => i.debugLevel > 0);
-            if (
-                falseInstructions.length === 1 &&
-                requireCodes.indexOf(falseInstructions[0].name) > -1 &&
-                !condition.includes('msg.sig')
-            ) {
-                instructionLines += ' '.repeat(indentation) + 'require' + condition + ';\n';
-                instructionLines += stringifyInstructions(
-                    instruction.jump.true,
-                    debug,
-                    indentation
-                );
-            } else if (falseInstructions.length === 1 && falseInstructions[0].jump) {
+    instructionTree.forEach((instruction: any) => {
+        if (instruction.type === 'JUMPI' && instruction.false) {
+            const condition = instruction.toString();
+            const falseInstructions = instruction.false.filter((i: any) => i.debugLevel > 0);
+            if (falseInstructions.length === 1 && falseInstructions[0].type === 'JUMPI') {
                 instructionLines += ' '.repeat(indentation) + 'if' + condition + ' {\n';
-                instructionLines += stringifyInstructions(
-                    instruction.jump.true,
-                    debug,
-                    indentation + 4
-                );
+                instructionLines += stringifyInstructions(instruction.true, indentation + 4);
                 instructionLines += ' '.repeat(indentation) + '} else ';
-                const elseOrElseIf = stringifyInstructions(
-                    instruction.jump.false,
-                    debug,
-                    indentation
-                );
+                const elseOrElseIf = stringifyInstructions(instruction.false, indentation);
                 if (elseOrElseIf.trim().startsWith('if')) {
                     instructionLines += elseOrElseIf.trim() + '\n';
                 } else {
@@ -47,21 +23,13 @@ export const stringifyInstructions = (depthInstructions: any, debug = false, ind
                 }
             } else {
                 instructionLines += ' '.repeat(indentation) + 'if' + condition + ' {\n';
-                instructionLines += stringifyInstructions(
-                    instruction.jump.true,
-                    debug,
-                    indentation + 4
-                );
+                instructionLines += stringifyInstructions(instruction.true, indentation + 4);
                 instructionLines += ' '.repeat(indentation) + '} else {\n';
-                instructionLines += stringifyInstructions(
-                    instruction.jump.false,
-                    debug,
-                    indentation + 4
-                );
+                instructionLines += stringifyInstructions(instruction.false, indentation + 4);
                 instructionLines += ' '.repeat(indentation) + '}\n';
             }
-        } else if (debug || instruction.debugLevel > 0) {
-            instructionLines += ' '.repeat(indentation) + instruction.description + '\n';
+        } else {
+            instructionLines += ' '.repeat(indentation) + instruction.toString() + '\n';
         }
     });
     return instructionLines;

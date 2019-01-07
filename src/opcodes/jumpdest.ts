@@ -4,7 +4,5 @@ import Instruction from '../classes/instruction.class';
 
 export default (opcode: Opcode, state: EVM): Instruction => {
     const instruction = new Instruction(opcode.name, opcode.pc);
-    instruction.setDebug();
-    instruction.setDescription('JUMPDEST');
     return instruction;
 };

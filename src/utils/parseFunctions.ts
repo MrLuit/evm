@@ -110,6 +110,14 @@ export default (stringifiedInstructions: string, returnEarly?: boolean) => {
         delete functions['else()'];
     }
 
+    if (
+        '()' in functions &&
+        functions['()'].lines.length === 1 &&
+        functions['()'].lines[0].trim() === 'revert();'
+    ) {
+        delete functions['()'];
+    }
+
     Object.keys(functions).forEach(key => {
         if (
             functions[key].lines.length === 1 &&

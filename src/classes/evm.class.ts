@@ -3,9 +3,11 @@ import * as functionHashes from '../../data/functionHashes.json';
 import * as eventHashes from '../../data/eventHashes.json';
 import allOpcodes from '../utils/opcodes';
 import stringifyInstructions from '../utils/stringifyInstructions';
+import stringifyFunctions from '../utils/stringifyFunctions';
 import parseFunctions from '../utils/parseFunctions';
 import parseEvents from '../utils/parseEvents';
 import parseMappings from '../utils/parseMappings';
+import parseVariables from '../utils/parseVariables';
 import Instruction from './instruction.class';
 import Opcode from '../interfaces/opcode.interface';
 import Stack from './stack.class';
@@ -19,12 +21,15 @@ class EVM {
     stack: Stack;
     memory: Memory;
     opcodes: Opcode[];
-    instructions: Instruction[];
+    //instructions: Instruction[];
+    instructions: any;
     storage: Storage;
     jumps: Jumps;
     code: Buffer;
     mappings: Mappings;
     layer: number;
+    halted: boolean;
+    functions: any;
 
     constructor(code: string | Buffer) {
         this.pc = 0;
@@ -36,6 +41,8 @@ class EVM {
         this.jumps = {};
         this.mappings = {};
         this.layer = 0;
+        this.halted = false;
+        this.functions = {};
         if (code instanceof Buffer) {
             this.code = code;
         } else {
@@ -49,10 +56,12 @@ class EVM {
         clone.opcodes = this.opcodes;
         clone.stack = this.stack.clone();
         clone.memory = { ...this.memory };
-        clone.storage = { ...this.storage };
+        //clone.storage = { ...this.storage };
+        clone.storage = this.storage;
         clone.jumps = { ...this.jumps };
         clone.mappings = this.mappings;
         clone.layer = this.layer + 1;
+        clone.functions = this.functions;
         return clone;
     }
 
@@ -102,7 +111,7 @@ class EVM {
     }
 
     getABI(json?: boolean): object | string {
-        const instructions = this.run();
+        const instructions = this.parse();
         const functions = parseFunctions(stringifyInstructions(instructions), true);
         const ABIFunctions: any = this.getFunctions().map(item => {
             const outputs: any = [];
@@ -238,39 +247,32 @@ class EVM {
         this.mappings = {};
     }
 
-    run(): Instruction[] {
+    parse(): Instruction[] {
         if (this.instructions.length === 0) {
-            const opCodes = this.getOpcodes();
-            for (this.pc; this.pc < opCodes.length; this.pc++) {
-                const opCode = opCodes[this.pc];
-                if (!(opCode.name in allOpcodes)) {
-                    throw new Error('Unknown OPCODE: ' + opCode.name);
+            const opcodes = this.getOpcodes();
+            for (this.pc; this.pc < opcodes.length && !this.halted; this.pc++) {
+                const opcode = opcodes[this.pc];
+                if (!(opcode.name in allOpcodes)) {
+                    throw new Error('Unknown OPCODE: ' + opcode.name);
                 } else {
-                    const result = (allOpcodes as any)[opCode.name](opCode, this);
-                    this.instructions.push(result);
-                    if (!result) {
-                        throw new Error('No result? ' + opCode);
-                    } else if (result.halted) {
-                        break;
-                    }
+                    (allOpcodes as any)[opcode.name](opcode, this);
                 }
             }
         }
         return this.instructions;
     }
 
-    decompile(debug = false): string {
-        const instructions = this.run();
+    decompile(): string {
+        const instructionTree = this.parse();
         const events = parseEvents(this.getEvents());
-        const decompiledCode = parseMappings(
-            parseFunctions(stringifyInstructions(instructions, debug)),
-            this.mappings
-        );
-        if (events) {
-            return events + '\n\n' + decompiledCode;
-        } else {
-            return decompiledCode;
-        }
+        const variables = parseVariables(this.storage, this.functions, instructionTree);
+        const functions = Object.keys(this.functions)
+            .map((functionName: string) =>
+                stringifyFunctions(functionName, this.functions[functionName])
+            )
+            .join('');
+        const code = stringifyInstructions(instructionTree);
+        return events + variables + functions + code;
     }
 }
 

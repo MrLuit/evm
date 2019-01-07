@@ -1,45 +1,71 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
 import Instruction from '../classes/instruction.class';
-import { isHex, pad32, default as formatHex } from '../utils/hex';
+import { MLOAD } from './mload';
+import { hex2a } from '../utils/hex';
+import * as BigNumber from '../../node_modules/big-integer';
+import stringify from '../utils/stringify';
+
+export class RETURN {
+    readonly type: string;
+    readonly static: boolean;
+    readonly memoryStart?: any;
+    readonly memoryLength?: any;
+    readonly items: any;
+
+    constructor(items: any, memoryStart?: any, memoryLength?: any) {
+        this.type = 'RETURN';
+        this.static = false;
+        if (memoryStart && memoryLength) {
+            this.memoryStart = memoryStart;
+            this.memoryLength = memoryLength;
+        } else {
+            this.items = items;
+        }
+    }
+
+    toString() {
+        if (this.items.length === 0) {
+            return 'return;';
+        } else if (
+            this.items.length === 1 &&
+            (BigNumber.isInstance(this.items[0]) || this.items[0].static)
+        ) {
+            return 'return ' + this.items[0] + ';';
+        } else if (
+            this.items.length === 3 &&
+            this.items.every((item: any) => BigNumber.isInstance(item)) &&
+            this.items[0].equals(32)
+        ) {
+            return 'return "' + hex2a(this.items[2].toString(16)) + '";';
+        } else {
+            return 'return(' + this.items.map((item: any) => stringify(item)).join(', ') + ');';
+        }
+    }
+}
 
 export default (opcode: Opcode, state: EVM): Instruction => {
     const memoryStart = state.stack.pop();
     const memoryLength = state.stack.pop();
     const instruction = new Instruction(opcode.name, opcode.pc);
     instruction.halt();
-    if (isHex(memoryStart) && isHex(memoryLength)) {
-        const memoryItems = [];
+    state.halted = true;
+    if (BigNumber.isInstance(memoryStart) && BigNumber.isInstance(memoryLength)) {
+        const items = [];
         for (
-            let i = parseInt(memoryStart, 16);
-            i < parseInt(memoryStart, 16) + parseInt(memoryLength, 16);
+            let i = memoryStart.toJSNumber();
+            i < memoryStart.add(memoryLength).toJSNumber();
             i += 32
         ) {
-            const memoryIndex = i.toString(16);
-            if (memoryIndex in state.memory) {
-                memoryItems.push(state.memory[memoryIndex]);
+            if (i in state.memory) {
+                items.push(state.memory[i]);
             } else {
-                memoryItems.push('memory[0x' + memoryIndex + ']');
+                items.push(new MLOAD(i));
             }
         }
-        if (memoryItems.every(item => !isNaN(parseInt(item, 16)))) {
-            instruction.setDescription(
-                'return %s;',
-                formatHex(memoryItems.map(i => pad32(i.toString())).join(''))
-            );
-        } else {
-            instruction.setDescription(
-                'return %s;',
-                formatHex(memoryItems.map(i => formatHex(i)).join(' + '))
-            );
-        }
+        state.instructions.push(new RETURN(items));
     } else {
-        instruction.setDescription(
-            'return memory[0x%s:(0x%s+0x%s)];',
-            memoryStart,
-            memoryStart,
-            memoryLength
-        );
+        state.instructions.push(new RETURN([], memoryStart, memoryLength));
     }
     return instruction;
 };

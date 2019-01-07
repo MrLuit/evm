@@ -1,66 +1,37 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
 import Instruction from '../classes/instruction.class';
+import * as BigNumber from '../../node_modules/big-integer';
+import stringify from '../utils/stringify';
+
+export class SSTORE {
+    readonly type: string;
+    readonly static: boolean;
+    readonly location: any;
+    readonly data: any;
+    readonly storage: any;
+
+    constructor(location: any, data: any, storage: any) {
+        this.type = 'SSTORE';
+        this.static = false;
+        this.location = location;
+        this.data = data;
+        this.storage = storage;
+    }
+
+    toString() {
+        if (BigNumber.isInstance(this.location) && this.location.toString(16) in this.storage) {
+            return this.storage[this.location.toString(16)] + ' = ' + stringify(this.data) + ';';
+        } else {
+            return 'storage[' + stringify(this.location) + '] = ' + stringify(this.data) + ';';
+        }
+    }
+}
 
 export default (opcode: Opcode, state: EVM): Instruction => {
     const storeLocation = state.stack.pop();
-    let storeData = state.stack.pop();
+    const storeData = state.stack.pop();
     const instruction = new Instruction(opcode.name, opcode.pc);
-    const storageVar = 'storage[' + storeLocation + ']';
-
-    if (storeData.includes(storageVar + ' + ')) {
-        storeData = storeData.split(storageVar + ' + ')[1].slice(0, -1);
-        instruction.setDescription('storage[%s] += %s;', storeLocation, storeData);
-    } else if (storeData.includes(storageVar + ' - ')) {
-        storeData = storeData.split(storageVar + ' - ')[1].slice(0, -1);
-        instruction.setDescription('storage[%s] -= %s;', storeLocation, storeData);
-    } else if (!isNaN(parseInt(storeLocation, 16))) {
-        instruction.setDescription('storage[0x%s] = %s;', storeLocation, storeData);
-    } else {
-        instruction.setDescription('storage[%s] = %s;', storeLocation, storeData);
-    }
-    state.storage[storeLocation] = storeData;
-
-    if (storeLocation.startsWith('keccak256(') && storeLocation.endsWith(')')) {
-        const mappingIndicator = storeLocation
-            .replace('keccak256(', '')
-            .slice(0, -1)
-            .replace(/msg\.data\[0x[0-9]+\]/g, '*')
-            .replace(/msg\.sender/g, '*');
-        if (!(mappingIndicator in state.mappings)) {
-            state.mappings[mappingIndicator] = {
-                keys: [
-                    storeLocation
-                        .replace('keccak256(', '')
-                        .slice(0, -1)
-                        .replace(new RegExp(' \\+ [0-9]+', 'g'), '')
-                ],
-                value: [storeData.replace(new RegExp(' + [0-9]+', 'g'), '')]
-            };
-        } else if (
-            !state.mappings[mappingIndicator].keys.includes(
-                storeLocation
-                    .replace('keccak256(', '')
-                    .slice(0, -1)
-                    .replace(new RegExp(' \\+ [0-9]+', 'g'), '')
-            )
-        ) {
-            state.mappings[mappingIndicator].keys.push(
-                storeLocation
-                    .replace('keccak256(', '')
-                    .slice(0, -1)
-                    .replace(new RegExp(' \\+ [0-9]+', 'g'), '')
-            );
-        } else if (
-            !state.mappings[mappingIndicator].value.includes(
-                storeData.replace(new RegExp(' \\+ [0-9]+', 'g'), '')
-            )
-        ) {
-            state.mappings[mappingIndicator].value.push(
-                storeData.replace(new RegExp(' \\+ [0-9]+', 'g'), '')
-            );
-        }
-    }
-
+    state.instructions.push(new SSTORE(storeLocation, storeData, state.storage));
     return instruction;
 };

@@ -1,24 +1,35 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
 import Instruction from '../classes/instruction.class';
-import { isHex } from '../utils/hex';
+import * as BigNumber from '../../node_modules/big-integer';
+import stringify from '../utils/stringify';
+
+export class GT {
+    readonly type: string;
+    readonly static: boolean;
+    readonly left: any;
+    readonly right: any;
+
+    constructor(left: any, right: any) {
+        this.type = 'GT';
+        this.static = false;
+        this.left = left;
+        this.right = right;
+    }
+
+    toString() {
+        return stringify(this.left) + ' > ' + stringify(this.right);
+    }
+}
 
 export default (opcode: Opcode, state: EVM): Instruction => {
-    const stackItem1 = state.stack.pop();
-    const stackItem2 = state.stack.pop();
+    const left = state.stack.pop();
+    const right = state.stack.pop();
     const instruction = new Instruction(opcode.name, opcode.pc);
-    instruction.setDebug();
-    if (isHex(stackItem1) && isHex(stackItem2)) {
-        if (parseInt(stackItem1, 16) > parseInt(stackItem2, 16)) {
-            instruction.setDescription('stack.push(1);');
-            state.stack.push('1');
-        } else {
-            instruction.setDescription('stack.push(0);');
-            state.stack.push('0');
-        }
+    if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
+        state.stack.push(BigNumber(left.greater(right) === true ? 1 : 0));
     } else {
-        instruction.setDescription('stack.push(%s > %s);', stackItem1, stackItem2);
-        state.stack.push('(' + stackItem1 + ' > ' + stackItem2 + ')');
+        state.stack.push(new GT(left, right));
     }
     return instruction;
 };
