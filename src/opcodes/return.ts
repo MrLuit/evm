@@ -25,7 +25,17 @@ export class RETURN {
     }
 
     toString() {
-        if (this.items.length === 0) {
+        if (this.memoryStart && this.memoryLength) {
+            return (
+                'return memory[' +
+                stringify(this.memoryStart) +
+                ':(' +
+                stringify(this.memoryStart) +
+                '+' +
+                stringify(this.memoryLength) +
+                ')];'
+            );
+        } else if (this.items.length === 0) {
             return 'return;';
         } else if (
             this.items.length === 1 &&
