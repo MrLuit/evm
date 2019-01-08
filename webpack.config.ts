@@ -9,11 +9,11 @@ const sourcePath = path.resolve(__dirname, 'src');
 const config: Configuration = {
     mode: isDevelopment ? 'development' : 'production',
     entry: {
-        EVM_Utils: path.resolve(sourcePath, 'index.ts')
+        EVM: path.resolve(sourcePath, 'index.ts')
     },
     output: {
         path: path.resolve(__dirname, 'lib'),
-        library: 'EVM_Utils'
+        library: 'EVM'
     },
     resolve: {
         extensions: ['.ts', '.js']

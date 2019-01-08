@@ -77,7 +77,7 @@ web3.eth.getCode("0x06012c8cf97BEaD5deAe237070F9587f8E7A266d").then(code => {  /
 
 #### Browser
 ```javascript
-const { EVM } = window.EVM_Utils;
+const { EVM } = window.EVM;
 const web3 = new Web3(window.web3.currentProvider);
 web3.eth.getCode("0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359", function(err,code) {  /* DAI contract */
     if(err) throw err;
@@ -106,7 +106,7 @@ web3.eth.getTransaction("0xd20a8d888a3f29471ea41ea77cc2d95ccd79ade1eaad059e83524
 
 #### Browser
 ```javascript
-const { Transaction } = window.EVM_Utils;
+const { Transaction } = window.EVM;
 const web3 = new Web3(window.web3.currentProvider);
 web3.eth.getTransaction("0xd20a8d888a3f29471ea41ea77cc2d95ccd79ade1eaad059e83524e72b9adf962", function(err,transactionData) {
     if(err) throw err;
