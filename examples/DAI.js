@@ -1,5 +1,5 @@
 const Web3 = require('web3');
-const EVM = require("../");
+const { EVM } = require("../");
 const web3 = new Web3(new Web3.providers.HttpProvider("https://api.mycryptoapi.com/eth"));
 
 (async () => {

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>EVM Bytecode Decompiler</title>
+        <style>
+            .code,.loading {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>EVM Bytecode Decompiler</h1>
+        <div class="contracts">
+            <h2>Examples</h2>
+            <ul>
+                <li><a href="#0x3FDA67f7583380E67ef93072294a7fAc882FD7E7">Compound</a></li>
+                <li><a href="#0x06012c8cf97BEaD5deAe237070F9587f8E7A266d">CryptoKitties</a></li>
+                <li><a href="#0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359">DAI</a></li>
+                <li><a href="#0x314159265dD8dbb310642f98f50C066173C1259b">ENS</a></li>
+                <li><a href="#0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2">Wrapped Ether (WETH)</a></li>
+            </ul>
+        </div>
+        <div class="loading">
+            <p>Loading...</p>
+        </div>
+        <div class="code">
+            <pre><code id="code"></code></pre>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+        <script src="../lib/EVM_Utils.js"></script>
+        <script>
+            const { EVM } = window.EVM_Utils;
+            const web3 = new Web3(new Web3.providers.HttpProvider("https://api.mycryptoapi.com/eth"));
+            function getCode() {
+                $(".contracts").fadeOut(function() {
+                    $(".loading").fadeIn();
+                });
+                web3.eth.getCode(location.hash.replace("#",""), function(err,code) {
+                    if(err) alert(err.message);
+                    try {
+                        const evm = new EVM(code);
+                        $("#code").html(evm.decompile());
+                        $(".loading").fadeOut(function() {
+                            $(".code").fadeIn();
+                        });
+                    } catch(err) {
+                        console.error(err);
+                        alert(err.message);
+                    }
+                });
+            }
+            $(window).on('hashchange', getCode);
+            if(location.hash) getCode();
+        </script>
+    </body>
+</html>

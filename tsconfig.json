@@ -18,6 +18,7 @@
       "./src/**/*.ts",
       "./tests/**/*.ts",
       "./scripts/**/*.ts",
+      "./examples/**/*.ts",
       "webpack.config.ts"
     ]
   }
