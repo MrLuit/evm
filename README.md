@@ -1,14 +1,14 @@
 # EVM Bytecode Decompiler
-[![](https://img.shields.io/travis/com/MrLuit/evm-utils.svg?style=flat-square)](https://travis-ci.com/MrLuit/evm-utils)
-[![](https://img.shields.io/npm/v/evm-utils.svg?style=flat-square)](https://www.npmjs.com/package/evm-utils)
-[![](https://img.shields.io/david/MrLuit/evm-utils.svg?style=flat-square)](https://david-dm.org/MrLuit/evm-utils)
-[![](https://img.shields.io/github/license/MrLuit/evm-utils.svg?style=flat-square)](https://github.com/MrLuit/evm-utils/blob/master/LICENSE)
+[![](https://img.shields.io/travis/com/MrLuit/evm.svg?style=flat-square)](https://travis-ci.com/MrLuit/evm)
+[![](https://img.shields.io/npm/v/evm.svg?style=flat-square)](https://www.npmjs.com/package/evm)
+[![](https://img.shields.io/david/MrLuit/evm.svg?style=flat-square)](https://david-dm.org/MrLuit/evm)
+[![](https://img.shields.io/github/license/MrLuit/evm.svg?style=flat-square)](https://github.com/MrLuit/evm/blob/master/LICENSE)
     
-An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising-the-ethereum-virtual-machine-58457e61ca15) interpreter, decompiler, along with several other utils for programmatically extracting information from bytecode.
+An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising-the-ethereum-virtual-machine-58457e61ca15) interpreter and decompiler, along with several other utils for programmatically extracting information from bytecode.
 
 ## Usage
 
-> npm i evm-utils
+> npm i evm
 
 ## Features
 - **Converting bytecode to opcodes**
@@ -37,7 +37,7 @@ An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising
 #### Node.js
 
 ```javascript
-const EVM = require("evm-utils");
+const EVM = require("evm");
 const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.HttpProvider("https://api.mycryptoapi.com/eth"));
 
@@ -63,7 +63,7 @@ web3.eth.getCode("0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359", function(err,code
 #### Node.js
 
 ```javascript
-const EVM = require("evm-utils");
+const EVM = require("evm");
 const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.HttpProvider("https://api.mycryptoapi.com/eth"));
 
@@ -93,7 +93,7 @@ web3.eth.getCode("0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359", function(err,code
 #### Node.js
 
 ```javascript
-const { Transaction } = require("evm-utils");
+const { Transaction } = require("evm");
 const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.HttpProvider("https://api.mycryptoapi.com/eth"));
 

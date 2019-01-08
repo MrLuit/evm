@@ -1,6 +1,6 @@
 {
-  "name": "evm-utils",
-  "version": "0.0.1",
+  "name": "evm",
+  "version": "0.1.0",
   "description": "An ethereum virtual machine (EVM) bytecode decompiler",
   "main": "lib/EVM_Utils.node.js",
   "module": "lib/EVM_Utils.js",
@@ -18,14 +18,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MrLuit/evm-utils.git"
+    "url": "git+https://github.com/MrLuit/evm.git"
   },
   "author": "Luit",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/MrLuit/evm-utils/issues"
+    "url": "https://github.com/MrLuit/evm/issues"
   },
-  "homepage": "https://github.com/MrLuit/evm-utils#readme",
+  "homepage": "https://github.com/MrLuit/evm#readme",
   "keywords": [
     "ethereum",
     "evm",

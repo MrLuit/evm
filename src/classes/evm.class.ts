@@ -4,9 +4,7 @@ import * as eventHashes from '../../data/eventHashes.json';
 import allOpcodes from '../utils/opcodes';
 import stringifyInstructions from '../utils/stringifyInstructions';
 import stringifyFunctions from '../utils/stringifyFunctions';
-import parseFunctions from '../utils/parseFunctions';
 import parseEvents from '../utils/parseEvents';
-import parseMappings from '../utils/parseMappings';
 import parseVariables from '../utils/parseVariables';
 import Instruction from './instruction.class';
 import Opcode from '../interfaces/opcode.interface';
@@ -21,7 +19,6 @@ class EVM {
     stack: Stack;
     memory: Memory;
     opcodes: Opcode[];
-    //instructions: Instruction[];
     instructions: any;
     storage: Storage;
     jumps: Jumps;
@@ -108,110 +105,6 @@ class EVM {
                     .map(hash => (eventHashes as any)[hash])
             )
         ];
-    }
-
-    getABI(json?: boolean): object | string {
-        const instructions = this.parse();
-        const functions = parseFunctions(stringifyInstructions(instructions), true);
-        const ABIFunctions: any = this.getFunctions().map(item => {
-            const outputs: any = [];
-            const functionData = Object.keys(functions)
-                .map(key => functions[key])
-                .find((func: any) => func.function === item);
-            let constant = false;
-            let payable = false;
-            if (functionData) {
-                payable = functionData.payable;
-                if (
-                    functionData.lines.length === 1 &&
-                    functionData.lines[0].trim().startsWith('return')
-                ) {
-                    const line = functionData.lines[0]
-                        .trim()
-                        .substring(6)
-                        .slice(0, -1)
-                        .trim();
-                    if (
-                        line.split('"').length === 3 &&
-                        line.startsWith('"') &&
-                        line.endsWith('"')
-                    ) {
-                        outputs.push({ name: '_string', type: 'string' });
-                    } else if (!isNaN(parseInt(line, 10))) {
-                        outputs.push({ name: '_uint256', type: 'uint256' });
-                    }
-                    constant = true;
-                }
-            }
-            const argumentCounter: any = {};
-            const name = item.split('(')[0];
-            const inputs = item
-                .split('(')[1]
-                .split(')')[0]
-                .split(',')
-                .filter(a => a !== '')
-                .map(argument => {
-                    let argumentName = '_' + argument;
-                    if (!(argument in argumentCounter)) {
-                        argumentCounter[argument] = 0;
-                    } else {
-                        argumentCounter[argument]++;
-                        argumentName += argumentCounter[argument];
-                    }
-                    return {
-                        name: argumentName,
-                        type: argument
-                    };
-                });
-            return {
-                constant,
-                name,
-                inputs,
-                outputs,
-                payable,
-                type: 'function'
-            };
-        });
-        if ('()' in functions) {
-            ABIFunctions.push({
-                payable: functions['()'].payable,
-                type: 'fallback'
-            });
-        }
-        const ABIEvents = this.getEvents().map(item => {
-            const argumentCounter: any = {};
-            const name = item.split('(')[0];
-            const inputs = item
-                .split('(')[1]
-                .split(')')[0]
-                .split(',')
-                .filter(a => a !== '')
-                .map(argument => {
-                    let argumentName = '_' + argument;
-                    if (!(argument in argumentCounter)) {
-                        argumentCounter[argument] = 0;
-                    } else {
-                        argumentCounter[argument]++;
-                        argumentName += argumentCounter[argument];
-                    }
-                    return {
-                        name: argumentName,
-                        type: argument
-                    };
-                });
-            return {
-                name,
-                inputs,
-                type: 'event'
-            };
-        });
-
-        const ABI = [...ABIFunctions, ...ABIEvents];
-        if (!json) {
-            return ABI;
-        } else {
-            return JSON.stringify(ABI);
-        }
     }
 
     getJumpDestinations(): number[] {
