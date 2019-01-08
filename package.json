@@ -1,9 +1,9 @@
 {
   "name": "evm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An ethereum virtual machine (EVM) bytecode decompiler",
-  "main": "lib/EVM_Utils.node.js",
-  "module": "lib/EVM_Utils.js",
+  "main": "lib/EVM.node.js",
+  "module": "lib/EVM.js",
   "typings": "typings/src/index.d.ts",
   "scripts": {
     "tscheck": "tsc --noEmit --project tsconfig.json",
