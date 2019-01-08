@@ -28,9 +28,9 @@
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
-        <script src="../lib/EVM_Utils.js"></script>
+        <script src="../lib/EVM.js"></script>
         <script>
-            const { EVM } = window.EVM_Utils;
+            const { EVM } = window.EVM;
             const web3 = new Web3(new Web3.providers.HttpProvider("https://api.mycryptoapi.com/eth"));
             function getCode() {
                 $(".contracts").fadeOut(function() {
