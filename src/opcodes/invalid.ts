@@ -1,25 +1,24 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
-import Instruction from '../classes/instruction.class';
 
 export class INVALID {
-    readonly type: string;
-    readonly static: boolean;
+    readonly name: string;
+    readonly type?: string;
+    readonly wrapped: boolean;
+    readonly opcode: any;
 
-    constructor() {
-        this.type = 'INVALID';
-        this.static = false;
+    constructor(opcode: any) {
+        this.name = 'INVALID';
+        this.wrapped = false;
+        this.opcode = opcode;
     }
 
     toString() {
-        return 'INVALID';
+        return 'revert("Invalid instruction (0x' + this.opcode.toString(16) + ')");';
     }
 }
 
-export default (opcode: Opcode, state: EVM): Instruction => {
-    const instruction = new Instruction(opcode.name, opcode.pc);
+export default (opcode: Opcode, state: EVM): void => {
     state.halted = true;
-    instruction.halt();
-    state.instructions.push(new INVALID());
-    return instruction;
+    state.instructions.push(new INVALID(opcode.opcode));
 };

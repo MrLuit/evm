@@ -1,17 +1,17 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
-import Instruction from '../classes/instruction.class';
 import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class MLOAD {
-    readonly type: string;
-    readonly static: boolean;
+    readonly name: string;
+    readonly type?: string;
+    readonly wrapped: boolean;
     readonly location: any;
 
     constructor(location: any) {
-        this.type = 'MLOAD';
-        this.static = false;
+        this.name = 'MLOAD';
+        this.wrapped = false;
         this.location = location;
     }
 
@@ -20,13 +20,11 @@ export class MLOAD {
     }
 }
 
-export default (opcode: Opcode, state: EVM): Instruction => {
+export default (opcode: Opcode, state: EVM): void => {
     const memoryLocation = state.stack.pop();
-    const instruction = new Instruction(opcode.name, opcode.pc);
     if (BigNumber.isInstance(memoryLocation) && memoryLocation.toJSNumber() in state.memory) {
         state.stack.push(state.memory[memoryLocation.toJSNumber()]);
     } else {
         state.stack.push(new MLOAD(memoryLocation));
     }
-    return instruction;
 };

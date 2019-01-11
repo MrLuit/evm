@@ -1,18 +1,18 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
-import Instruction from '../classes/instruction.class';
 import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class XOR {
-    readonly type: string;
-    readonly static: boolean;
+    readonly name: string;
+    readonly type?: string;
+    readonly wrapped: boolean;
     readonly left: any;
     readonly right: any;
 
     constructor(left: any, right: any) {
-        this.type = 'XOR';
-        this.static = false;
+        this.name = 'XOR';
+        this.wrapped = false;
         this.left = left;
         this.right = right;
     }
@@ -22,14 +22,12 @@ export class XOR {
     }
 }
 
-export default (opcode: Opcode, state: EVM): Instruction => {
+export default (opcode: Opcode, state: EVM): void => {
     const left = state.stack.pop();
     const right = state.stack.pop();
-    const instruction = new Instruction(opcode.name, opcode.pc);
     if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
         state.stack.push(left.xor(right));
     } else {
         state.stack.push(new XOR(left, right));
     }
-    return instruction;
 };

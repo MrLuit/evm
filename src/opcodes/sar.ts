@@ -1,18 +1,18 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
-import Instruction from '../classes/instruction.class';
 import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class SAR {
-    readonly type: string;
-    readonly static: boolean;
+    readonly name: string;
+    readonly type?: string;
+    readonly wrapped: boolean;
     readonly left: any;
     readonly right: any;
 
     constructor(left: any, right: any) {
-        this.type = 'SAR';
-        this.static = false;
+        this.name = 'SAR';
+        this.wrapped = false;
         this.left = left;
         this.right = right;
     }
@@ -22,14 +22,12 @@ export class SAR {
     }
 }
 
-export default (opcode: Opcode, state: EVM): Instruction => {
+export default (opcode: Opcode, state: EVM): void => {
     const left = state.stack.pop();
     const right = state.stack.pop();
-    const instruction = new Instruction(opcode.name, opcode.pc);
     if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
         state.stack.push(left.shiftRight(right));
     } else {
         state.stack.push(new SAR(left, right));
     }
-    return instruction;
 };

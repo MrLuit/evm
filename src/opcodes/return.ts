@@ -1,21 +1,21 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
-import Instruction from '../classes/instruction.class';
 import { MLOAD } from './mload';
 import { hex2a } from '../utils/hex';
 import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class RETURN {
-    readonly type: string;
-    readonly static: boolean;
+    readonly name: string;
+    readonly type?: string;
+    readonly wrapped: boolean;
     readonly memoryStart?: any;
     readonly memoryLength?: any;
     readonly items: any;
 
     constructor(items: any, memoryStart?: any, memoryLength?: any) {
-        this.type = 'RETURN';
-        this.static = false;
+        this.name = 'RETURN';
+        this.wrapped = false;
         if (memoryStart && memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;
@@ -54,11 +54,9 @@ export class RETURN {
     }
 }
 
-export default (opcode: Opcode, state: EVM): Instruction => {
+export default (opcode: Opcode, state: EVM): void => {
     const memoryStart = state.stack.pop();
     const memoryLength = state.stack.pop();
-    const instruction = new Instruction(opcode.name, opcode.pc);
-    instruction.halt();
     state.halted = true;
     if (BigNumber.isInstance(memoryStart) && BigNumber.isInstance(memoryLength)) {
         const items = [];
@@ -77,5 +75,4 @@ export default (opcode: Opcode, state: EVM): Instruction => {
     } else {
         state.instructions.push(new RETURN([], memoryStart, memoryLength));
     }
-    return instruction;
 };

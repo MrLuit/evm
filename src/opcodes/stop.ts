@@ -1,14 +1,14 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
-import Instruction from '../classes/instruction.class';
 
 export class STOP {
-    readonly type: string;
-    readonly static: boolean;
+    readonly name: string;
+    readonly type?: string;
+    readonly wrapped: boolean;
 
     constructor() {
-        this.type = 'STOP';
-        this.static = true;
+        this.name = 'STOP';
+        this.wrapped = true;
     }
 
     toString() {
@@ -16,10 +16,7 @@ export class STOP {
     }
 }
 
-export default (opcode: Opcode, state: EVM): Instruction => {
-    const instruction = new Instruction(opcode.name, opcode.pc);
-    instruction.halt();
+export default (opcode: Opcode, state: EVM): void => {
     state.halted = true;
     state.instructions.push(new STOP());
-    return instruction;
 };

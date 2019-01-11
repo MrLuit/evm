@@ -13,9 +13,9 @@ export default (storage: any, functions: any, instructions: any) => {
             const functionTree = functions[functionName];
             if (
                 functionTree.items.length === 1 &&
-                functionTree.items[0].type === 'RETURN' &&
+                functionTree.items[0].name === 'RETURN' &&
                 functionTree.items[0].items.length === 1 &&
-                functionTree.items[0].items[0].type === 'SLOAD' &&
+                functionTree.items[0].items[0].name === 'SLOAD' &&
                 BigNumber.isInstance(functionTree.items[0].items[0].location)
             ) {
                 variableFunctions.push(

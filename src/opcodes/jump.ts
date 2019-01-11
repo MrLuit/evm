@@ -1,18 +1,18 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
-import Instruction from '../classes/instruction.class';
 import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class JUMP {
-    readonly type: string;
-    readonly static: boolean;
+    readonly name: string;
+    readonly type?: string;
+    readonly wrapped: boolean;
     readonly valid: boolean;
     readonly location: any;
 
     constructor(location: any, bad?: boolean) {
-        this.type = 'JUMP';
-        this.static = true;
+        this.name = 'JUMP';
+        this.wrapped = true;
         this.location = location;
         this.valid = true;
         if (bad) {
@@ -29,10 +29,8 @@ export class JUMP {
     }
 }
 
-export default (opcode: Opcode, state: EVM): Instruction => {
+export default (opcode: Opcode, state: EVM): void => {
     const jumpLocation = state.stack.pop();
-    const instruction = new Instruction(opcode.name, opcode.pc);
-    instruction.setDescription('goto(%s);', jumpLocation);
     if (!BigNumber.isInstance(jumpLocation)) {
         state.halted = true;
         state.instructions.push(new JUMP(jumpLocation, true));
@@ -59,5 +57,4 @@ export default (opcode: Opcode, state: EVM): Instruction => {
             }
         }
     }
-    return instruction;
 };

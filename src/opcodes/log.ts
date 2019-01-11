@@ -1,13 +1,13 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
-import Instruction from '../classes/instruction.class';
 import { MLOAD } from './mload';
 import * as eventHashes from '../../data/eventHashes.json';
 import * as BigNumber from '../../node_modules/big-integer';
 
 export class LOG {
-    readonly type: string;
-    readonly static: boolean;
+    readonly name: string;
+    readonly type?: string;
+    readonly wrapped: boolean;
     readonly memoryStart?: any;
     readonly memoryLength?: any;
     readonly items?: any;
@@ -15,8 +15,8 @@ export class LOG {
     readonly eventName?: string;
 
     constructor(topics: any, items?: any, memoryStart?: any, memoryLength?: any) {
-        this.type = 'LOG';
-        this.static = false;
+        this.name = 'LOG';
+        this.wrapped = false;
         this.topics = topics;
         if (
             this.topics.length > 0 &&
@@ -45,8 +45,7 @@ export class LOG {
     }
 }
 
-export default (opcode: Opcode, state: EVM): Instruction => {
-    const instruction = new Instruction(opcode.name, opcode.pc);
+export default (opcode: Opcode, state: EVM): void => {
     const topicsCount = parseInt(opcode.name.replace('LOG', ''), 10);
     const memoryStart = state.stack.pop();
     const memoryLength = state.stack.pop();
@@ -71,5 +70,4 @@ export default (opcode: Opcode, state: EVM): Instruction => {
     } else {
         state.instructions.push(new LOG(topics, [], memoryStart, memoryLength));
     }
-    return instruction;
 };
