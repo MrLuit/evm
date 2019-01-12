@@ -12,7 +12,7 @@ export class EXTCODECOPY {
 
     constructor(address: any, startLocation: any, copyLength: any) {
         this.name = 'EXTCODECOPY';
-        this.wrapped = false;
+        this.wrapped = true;
         this.address = address;
         this.startLocation = startLocation;
         this.copyLength = copyLength;

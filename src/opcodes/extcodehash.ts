@@ -10,7 +10,7 @@ export class EXTCODEHASH {
 
     constructor(address: any) {
         this.name = 'EXTCODEHASH';
-        this.wrapped = false;
+        this.wrapped = true;
         this.address = address;
     }
 

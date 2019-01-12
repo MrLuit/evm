@@ -10,7 +10,7 @@ export class BALANCE {
 
     constructor(address: any) {
         this.name = 'BALANCE';
-        this.wrapped = false;
+        this.wrapped = true;
         this.address = address;
     }
 

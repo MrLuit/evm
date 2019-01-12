@@ -12,7 +12,7 @@ export class MOD {
 
     constructor(left: any, right: any) {
         this.name = 'MOD';
-        this.wrapped = false;
+        this.wrapped = true;
         this.left = left;
         this.right = right;
     }

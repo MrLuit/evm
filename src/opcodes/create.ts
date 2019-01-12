@@ -13,7 +13,7 @@ export class CREATE {
     constructor(memoryStart: any, memoryLength: any, value: any) {
         this.name = 'CREATE';
         this.name = 'address';
-        this.wrapped = false;
+        this.wrapped = true;
         this.memoryStart = memoryStart;
         this.memoryLength = memoryLength;
         this.value = value;

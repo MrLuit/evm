@@ -12,7 +12,7 @@ export class MSTORE {
 
     constructor(location: any, data: any) {
         this.name = 'MSTORE';
-        this.wrapped = false;
+        this.wrapped = true;
         this.location = location;
         this.data = data;
     }

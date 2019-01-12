@@ -8,7 +8,7 @@ export class STOP {
 
     constructor() {
         this.name = 'STOP';
-        this.wrapped = true;
+        this.wrapped = false;
     }
 
     toString() {

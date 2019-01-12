@@ -8,7 +8,7 @@ export class GASLIMIT {
 
     constructor() {
         this.name = 'GASLIMIT';
-        this.wrapped = true;
+        this.wrapped = false;
     }
 
     toString() {

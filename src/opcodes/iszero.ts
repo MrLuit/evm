@@ -13,7 +13,7 @@ export class ISZERO {
 
     constructor(item: any) {
         this.name = 'ISZERO';
-        this.wrapped = false;
+        this.wrapped = true;
         this.item = item;
     }
 

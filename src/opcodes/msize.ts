@@ -8,7 +8,7 @@ export class MSIZE {
 
     constructor() {
         this.name = 'MSIZE';
-        this.wrapped = true;
+        this.wrapped = false;
     }
 
     toString() {

@@ -22,7 +22,7 @@ export class STATICCALL {
         outputLength: any
     ) {
         this.name = 'STATICCALL';
-        this.wrapped = false;
+        this.wrapped = true;
         this.gas = gas;
         this.address = address;
         this.memoryStart = memoryStart;

@@ -12,7 +12,7 @@ export class MUL {
 
     constructor(left: any, right: any) {
         this.name = 'MUL';
-        this.wrapped = false;
+        this.wrapped = true;
         this.left = left;
         this.right = right;
     }

@@ -8,7 +8,7 @@ export class CALLVALUE {
 
     constructor() {
         this.name = 'CALLVALUE';
-        this.wrapped = true;
+        this.wrapped = false;
     }
 
     toString() {

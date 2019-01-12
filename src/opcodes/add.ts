@@ -11,7 +11,7 @@ export class ADD {
 
     constructor(left: any, right: any) {
         this.name = 'ADD';
-        this.wrapped = false;
+        this.wrapped = true;
         this.left = left;
         this.right = right;
     }

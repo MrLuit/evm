@@ -8,7 +8,7 @@ export class ORIGIN {
 
     constructor() {
         this.name = 'ORIGIN';
-        this.wrapped = true;
+        this.wrapped = false;
     }
 
     toString() {

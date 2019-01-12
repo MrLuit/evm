@@ -11,7 +11,7 @@ export class SIG {
 
     constructor(hash: string) {
         this.name = 'SIG';
-        this.wrapped = true;
+        this.wrapped = false;
         this.hash = hash;
     }
 
@@ -29,7 +29,7 @@ export class EQ {
 
     constructor(left: any, right: any) {
         this.name = 'EQ';
-        this.wrapped = false;
+        this.wrapped = true;
         this.left = left;
         this.right = right;
     }

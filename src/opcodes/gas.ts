@@ -8,7 +8,7 @@ export class GAS {
 
     constructor() {
         this.name = 'GAS';
-        this.wrapped = true;
+        this.wrapped = false;
     }
 
     toString() {

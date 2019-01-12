@@ -11,7 +11,7 @@ export class NOT {
 
     constructor(item: any) {
         this.name = 'AND';
-        this.wrapped = false;
+        this.wrapped = true;
         this.item = item;
     }
 

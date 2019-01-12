@@ -12,7 +12,7 @@ export class BYTE {
 
     constructor(position: any, data: any) {
         this.name = 'BYTE';
-        this.wrapped = false;
+        this.wrapped = true;
         this.position = position;
         this.data = data;
     }

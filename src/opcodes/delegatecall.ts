@@ -22,7 +22,7 @@ export class DELEGATECALL {
         outputLength: any
     ) {
         this.name = 'DELEGATECALL';
-        this.wrapped = false;
+        this.wrapped = true;
         this.gas = gas;
         this.address = address;
         this.memoryStart = memoryStart;

@@ -16,7 +16,7 @@ export class LOG {
 
     constructor(topics: any, items?: any, memoryStart?: any, memoryLength?: any) {
         this.name = 'LOG';
-        this.wrapped = false;
+        this.wrapped = true;
         this.topics = topics;
         if (
             this.topics.length > 0 &&

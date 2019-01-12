@@ -11,7 +11,7 @@ export class MLOAD {
 
     constructor(location: any) {
         this.name = 'MLOAD';
-        this.wrapped = false;
+        this.wrapped = true;
         this.location = location;
     }
 

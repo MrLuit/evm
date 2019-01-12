@@ -24,7 +24,7 @@ export class CALL {
         outputLength: any
     ) {
         this.name = 'CALL';
-        this.wrapped = false;
+        this.wrapped = true;
         this.gas = gas;
         this.address = address;
         this.value = value;

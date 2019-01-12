@@ -8,7 +8,7 @@ export class RETURNDATASIZE {
 
     constructor() {
         this.name = 'RETURNDATASIZE';
-        this.wrapped = true;
+        this.wrapped = false;
     }
 
     toString() {

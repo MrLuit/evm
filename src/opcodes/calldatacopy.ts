@@ -10,7 +10,7 @@ export class CALLDATACOPY {
 
     constructor(startLocation: any, copyLength: any) {
         this.name = 'CALLDATACOPY';
-        this.wrapped = false;
+        this.wrapped = true;
         this.startLocation = startLocation;
         this.copyLength = copyLength;
     }

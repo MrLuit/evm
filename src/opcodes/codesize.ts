@@ -8,7 +8,7 @@ export class CODESIZE {
 
     constructor() {
         this.name = 'CODESIZE';
-        this.wrapped = true;
+        this.wrapped = false;
     }
 
     toString() {

@@ -10,7 +10,7 @@ export class EXTCODESIZE {
 
     constructor(address: any) {
         this.name = 'EXTCODESIZE';
-        this.wrapped = false;
+        this.wrapped = true;
         this.address = address;
     }
 

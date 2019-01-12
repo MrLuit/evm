@@ -8,7 +8,7 @@ export class TIMESTAMP {
 
     constructor() {
         this.name = 'TIMESTAMP';
-        this.wrapped = true;
+        this.wrapped = false;
     }
 
     toString() {

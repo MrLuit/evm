@@ -24,7 +24,7 @@ export class CALLCODE {
         outputLength: any
     ) {
         this.name = 'CALLCODE';
-        this.wrapped = false;
+        this.wrapped = true;
         this.gas = gas;
         this.address = address;
         this.value = value;

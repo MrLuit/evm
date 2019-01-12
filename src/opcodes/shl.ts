@@ -12,7 +12,7 @@ export class SHL {
 
     constructor(left: any, right: any) {
         this.name = 'SHL';
-        this.wrapped = false;
+        this.wrapped = true;
         this.left = left;
         this.right = right;
     }

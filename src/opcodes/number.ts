@@ -8,7 +8,7 @@ export class NUMBER {
 
     constructor() {
         this.name = 'NUMBER';
-        this.wrapped = true;
+        this.wrapped = false;
     }
 
     toString() {

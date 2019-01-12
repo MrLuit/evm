@@ -10,7 +10,7 @@ export class BLOCKHASH {
 
     constructor(blockNumber: any) {
         this.name = 'BLOCKHASH';
-        this.wrapped = false;
+        this.wrapped = true;
         this.number = blockNumber;
     }
 

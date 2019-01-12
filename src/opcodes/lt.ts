@@ -13,7 +13,7 @@ export class LT {
 
     constructor(left: any, right: any, equal: boolean = false) {
         this.name = 'LT';
-        this.wrapped = false;
+        this.wrapped = true;
         this.left = left;
         this.right = right;
         this.equal = equal;

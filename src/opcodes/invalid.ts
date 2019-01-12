@@ -9,7 +9,7 @@ export class INVALID {
 
     constructor(opcode: any) {
         this.name = 'INVALID';
-        this.wrapped = false;
+        this.wrapped = true;
         this.opcode = opcode;
     }
 

@@ -2,6 +2,7 @@ import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
 import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
+import { Variable } from './jumpi';
 
 const parseMapping = (...items: any[]) => {
     const mappings: any = [];
@@ -24,26 +25,38 @@ export class MappingStore {
     readonly items: any;
     readonly data: any;
     readonly structlocation?: any;
+    readonly mappings: any;
 
-    constructor(location: any, items: any, data: any, count: any, structlocation?: any) {
+    constructor(
+        mappings: any,
+        location: any,
+        items: any,
+        data: any,
+        count: any,
+        structlocation?: any
+    ) {
         this.name = 'MappingStore';
-        this.wrapped = true;
+        this.wrapped = false;
         this.location = location;
         this.items = items;
         this.data = data;
         this.count = count;
         this.structlocation = structlocation;
+        this.mappings = mappings;
     }
 
     toString() {
+        let mappingName = 'mapping' + (this.count + 1);
+        if (this.location in this.mappings() && this.mappings()[this.location].name) {
+            mappingName = this.mappings()[this.location].name;
+        }
         if (
             this.data.name === 'ADD' &&
             this.data.right.name === 'MappingLoad' &&
             stringify(this.data.right.location) === stringify(this.location)
         ) {
             return (
-                'mapping' +
-                (this.count + 1) +
+                mappingName +
                 this.items.map((item: any) => '[' + stringify(item) + ']').join('') +
                 ' += ' +
                 stringify(this.data.left) +
@@ -55,8 +68,7 @@ export class MappingStore {
             stringify(this.data.left.location) === stringify(this.location)
         ) {
             return (
-                'mapping' +
-                (this.count + 1) +
+                mappingName +
                 this.items.map((item: any) => '[' + stringify(item) + ']').join('') +
                 ' -= ' +
                 stringify(this.data.right) +
@@ -64,8 +76,7 @@ export class MappingStore {
             );
         } else {
             return (
-                'mapping' +
-                (this.count + 1) +
+                mappingName +
                 this.items.map((item: any) => '[' + stringify(item) + ']').join('') +
                 ' = ' +
                 stringify(this.data) +
@@ -81,66 +92,45 @@ export class SSTORE {
     readonly wrapped: boolean;
     readonly location: any;
     readonly data: any;
-    readonly storage: any;
+    readonly variables: any;
 
-    constructor(location: any, data: any, storage: any) {
+    constructor(location: any, data: any, variables: any) {
         this.name = 'SSTORE';
-        this.wrapped = false;
+        this.wrapped = true;
         this.location = location;
         this.data = data;
-        this.storage = storage;
+        this.variables = variables;
+        if (BigNumber.isInstance(this.location) && this.location.toString() in this.variables()) {
+            this.variables()[this.location.toString()].types.push(() => this.data.type);
+        } else if (
+            BigNumber.isInstance(this.location) &&
+            !(this.location.toString() in this.variables())
+        ) {
+            this.variables()[this.location.toString()] = new Variable(false, [
+                () => this.data.type
+            ]);
+        }
     }
 
     toString() {
+        let variableName = 'storage[' + stringify(this.location) + ']';
+        if (BigNumber.isInstance(this.location) && this.location.toString() in this.variables()) {
+            variableName = this.variables()[this.location.toString()].label;
+        }
         if (
             this.data.name === 'ADD' &&
             this.data.right.name === 'SLOAD' &&
             stringify(this.data.right.location) === stringify(this.location)
         ) {
-            if (BigNumber.isInstance(this.location) && this.location.toString(16) in this.storage) {
-                return (
-                    this.storage[this.location.toString(16)] +
-                    ' += ' +
-                    stringify(this.data.left) +
-                    ';'
-                );
-            } else {
-                return (
-                    'storage[' +
-                    stringify(this.location) +
-                    '] += ' +
-                    stringify(this.data.left) +
-                    ';'
-                );
-            }
+            return variableName + ' += ' + stringify(this.data.left) + ';';
         } else if (
             this.data.name === 'SUB' &&
             this.data.left.name === 'SLOAD' &&
             stringify(this.data.left.location) === stringify(this.location)
         ) {
-            if (BigNumber.isInstance(this.location) && this.location.toString(16) in this.storage) {
-                return (
-                    this.storage[this.location.toString(16)] +
-                    ' -= ' +
-                    stringify(this.data.right) +
-                    ';'
-                );
-            } else {
-                return (
-                    'storage[' +
-                    stringify(this.location) +
-                    '] -= ' +
-                    stringify(this.data.right) +
-                    ';'
-                );
-            }
-        } else if (
-            BigNumber.isInstance(this.location) &&
-            this.location.toString(16) in this.storage
-        ) {
-            return this.storage[this.location.toString(16)] + ' = ' + stringify(this.data) + ';';
+            return variableName + ' -= ' + stringify(this.data.right) + ';';
         } else {
-            return 'storage[' + stringify(this.location) + '] = ' + stringify(this.data) + ';';
+            return variableName + ' = ' + stringify(this.data) + ';';
         }
     }
 }
@@ -158,12 +148,18 @@ export default (opcode: Opcode, state: EVM): void => {
         );
         if (mappingLocation && mappingParts.length > 0) {
             if (!(mappingLocation in state.mappings)) {
-                state.mappings[mappingLocation] = { keys: [], values: [] };
+                state.mappings[mappingLocation] = {
+                    name: false,
+                    structs: [],
+                    keys: [],
+                    values: []
+                };
             }
             state.mappings[mappingLocation].keys.push(mappingParts);
             state.mappings[mappingLocation].values.push(storeData);
             state.instructions.push(
                 new MappingStore(
+                    () => state.mappings,
                     mappingLocation,
                     mappingParts,
                     storeData,
@@ -171,7 +167,7 @@ export default (opcode: Opcode, state: EVM): void => {
                 )
             );
         } else {
-            state.instructions.push(new SSTORE(storeLocation, storeData, state.storage));
+            state.instructions.push(new SSTORE(storeLocation, storeData, () => state.variables));
         }
     } else if (
         storeLocation.name === 'ADD' &&
@@ -187,11 +183,17 @@ export default (opcode: Opcode, state: EVM): void => {
         );
         if (mappingLocation && mappingParts.length > 0) {
             if (!(mappingLocation in state.mappings)) {
-                state.mappings[mappingLocation] = { keys: [], values: [] };
+                state.mappings[mappingLocation] = {
+                    name: false,
+                    structs: [],
+                    keys: [],
+                    values: []
+                };
             }
             state.mappings[mappingLocation].keys.push(mappingParts);
             state.instructions.push(
                 new MappingStore(
+                    () => state.mappings,
                     mappingLocation,
                     mappingParts,
                     storeData,
@@ -200,7 +202,7 @@ export default (opcode: Opcode, state: EVM): void => {
                 )
             );
         } else {
-            state.instructions.push(new SSTORE(storeLocation, storeData, state.storage));
+            state.instructions.push(new SSTORE(storeLocation, storeData, () => state.variables));
         }
     } else if (
         storeLocation.name === 'ADD' &&
@@ -216,11 +218,17 @@ export default (opcode: Opcode, state: EVM): void => {
         );
         if (mappingLocation && mappingParts.length > 0) {
             if (!(mappingLocation in state.mappings)) {
-                state.mappings[mappingLocation] = { keys: [], values: [] };
+                state.mappings[mappingLocation] = {
+                    name: false,
+                    structs: [],
+                    keys: [],
+                    values: []
+                };
             }
             state.mappings[mappingLocation].keys.push(mappingParts);
             state.instructions.push(
                 new MappingStore(
+                    () => state.mappings,
                     mappingLocation,
                     mappingParts,
                     storeData,
@@ -229,9 +237,18 @@ export default (opcode: Opcode, state: EVM): void => {
                 )
             );
         } else {
-            state.instructions.push(new SSTORE(storeLocation, storeData, state.storage));
+            state.instructions.push(new SSTORE(storeLocation, storeData, () => state.variables));
         }
+    } else if (
+        false &&
+        BigNumber.isInstance(storeLocation) &&
+        storeLocation.toString() in state.variables &&
+        storeData.type &&
+        !state.variables[storeLocation.toString()].types.includes(storeData.type)
+    ) {
+        state.instructions.push(new SSTORE(storeLocation, storeData, () => state.variables));
+        state.variables[storeLocation.toString()].types.push(storeData.type);
     } else {
-        state.instructions.push(new SSTORE(storeLocation, storeData, state.storage));
+        state.instructions.push(new SSTORE(storeLocation, storeData, () => state.variables));
     }
 };

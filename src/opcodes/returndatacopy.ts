@@ -11,7 +11,7 @@ export class RETURNDATACOPY {
 
     constructor(returnDataPosition: any, returnDataSize: any) {
         this.name = 'RETURNDATACOPY';
-        this.wrapped = false;
+        this.wrapped = true;
         this.returnDataPosition = returnDataPosition;
         this.returnDataSize = returnDataSize;
     }

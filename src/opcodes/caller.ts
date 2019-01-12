@@ -9,7 +9,7 @@ export class CALLER {
     constructor() {
         this.name = 'CALLER';
         this.name = 'address';
-        this.wrapped = true;
+        this.wrapped = false;
     }
 
     toString() {

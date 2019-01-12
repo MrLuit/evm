@@ -8,7 +8,7 @@ export class CALLDATASIZE {
 
     constructor() {
         this.name = 'CALLDATASIZE';
-        this.wrapped = true;
+        this.wrapped = false;
     }
 
     toString() {

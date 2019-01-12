@@ -10,7 +10,7 @@ export class SELFDESTRUCT {
 
     constructor(address: any) {
         this.name = 'SELFDESTRUCT';
-        this.wrapped = false;
+        this.wrapped = true;
         this.address = address;
     }
 

@@ -14,7 +14,7 @@ export class REVERT {
 
     constructor(items: any, memoryStart?: any, memoryLength?: any) {
         this.name = 'REVERT';
-        this.wrapped = false;
+        this.wrapped = true;
         if (memoryStart && memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;

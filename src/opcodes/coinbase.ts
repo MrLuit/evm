@@ -8,7 +8,7 @@ export class COINBASE {
 
     constructor() {
         this.name = 'COINBASE';
-        this.wrapped = true;
+        this.wrapped = false;
     }
 
     toString() {

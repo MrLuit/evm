@@ -14,7 +14,7 @@ export class SHA3 {
 
     constructor(items: any, memoryStart?: any, memoryLength?: any) {
         this.name = 'SHA3';
-        this.wrapped = true;
+        this.wrapped = false;
         if (memoryStart && memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;

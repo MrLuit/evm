@@ -25,22 +25,48 @@ const updateCallDataLoad = (item: any, types: any) => {
     }
 };
 
+const findReturns = (item: any) => {
+    const returns = [];
+    for (const i in item) {
+        if (item.hasOwnProperty(i)) {
+            if (
+                typeof item[i] === 'object' &&
+                item[i].name === 'RETURN' &&
+                item[i].items.length > 0
+            ) {
+                returns.push(item[i].items);
+            }
+            if (typeof item[i] === 'object') {
+                const deepReturns: any = findReturns(item[i]);
+                if (deepReturns.length > 0) {
+                    returns.push(...deepReturns);
+                }
+            }
+        }
+    }
+    return returns;
+};
+
 export class TopLevelFunction {
     readonly name: string;
     readonly type?: string;
     readonly hash: any;
+    readonly gasUsed: number;
     readonly payable: boolean;
     readonly visibility: string;
     readonly constant: boolean;
     readonly items: any;
+    readonly returns: any;
 
-    constructor(items: any, hash: any) {
+    constructor(items: any, hash: any, gasUsed: number) {
         this.name = 'Function';
         this.hash = hash;
+        this.gasUsed = gasUsed;
         this.items = items;
         this.payable = true;
         this.visibility = 'public';
         this.constant = false;
+        this.returns = [];
         if (
             this.items.length > 0 &&
             this.items[0] instanceof REQUIRE &&
@@ -67,6 +93,46 @@ export class TopLevelFunction {
                 this.items.forEach((item: any) => updateCallDataLoad(item, argumentTypes));
             }
         }
+        const returns: any = [];
+        this.items.forEach((item: any) => {
+            const deepReturns = findReturns(item);
+            if (deepReturns.length > 0) {
+                returns.push(...deepReturns);
+            }
+        });
+        if (
+            returns.length > 0 &&
+            returns.every(
+                (returnItem: any) =>
+                    returnItem.length === returns[0].length &&
+                    returnItem.map((item: any) => item.type).join('') ===
+                        returns[0].map((item: any) => item.type).join('')
+            )
+        ) {
+            returns[0].forEach((item: any) => {
+                if (BigNumber.isInstance(item)) {
+                    this.returns.push('uint256');
+                } else if (item.type) {
+                    this.returns.push(item.type);
+                } else {
+                    this.returns.push('unknown');
+                }
+            });
+        } else if (returns.length > 0) {
+            this.returns.push('<unknown>');
+        }
+    }
+}
+
+export class Variable {
+    readonly name: string;
+    readonly label: string | false;
+    readonly types: any;
+
+    constructor(label: string | false, types: any) {
+        this.name = 'Variable';
+        this.label = label;
+        this.types = types;
     }
 }
 
@@ -78,7 +144,7 @@ export class REQUIRE {
 
     constructor(condition: any) {
         this.name = 'REQUIRE';
-        this.wrapped = false;
+        this.wrapped = true;
         this.condition = condition;
     }
 
@@ -100,7 +166,7 @@ export class JUMPI {
 
     constructor(condition: any, location: any, ifTrue?: any, ifFalse?: any, skipped?: boolean) {
         this.name = 'JUMPI';
-        this.wrapped = false;
+        this.wrapped = true;
         this.condition = condition;
         this.location = location;
         if (skipped) {
@@ -166,17 +232,66 @@ export default (opcode: Opcode, state: EVM): void => {
             if (jumpIndex >= 0) {
                 const functionClone: any = state.clone();
                 functionClone.pc = jumpIndex;
+                const functionCloneTree = functionClone.parse();
                 state.functions[jumpCondition.hash] = new TopLevelFunction(
-                    functionClone.parse(),
-                    jumpCondition.hash
+                    functionCloneTree,
+                    jumpCondition.hash,
+                    functionClone.gasUsed
                 );
+                if (
+                    jumpCondition.hash in functionHashes &&
+                    functionCloneTree.length === 1 &&
+                    functionCloneTree[0].name === 'RETURN' &&
+                    functionCloneTree[0].items.every((item: any) => item.name === 'MappingLoad')
+                ) {
+                    functionCloneTree[0].items.forEach((item: any) => {
+                        const fullFunction = (functionHashes as any)[jumpCondition.hash];
+                        state.mappings[item.location].name = fullFunction.split('(')[0];
+                        if (
+                            item.structlocation &&
+                            !state.mappings[item.location].structs.includes(item.structlocation)
+                        ) {
+                            state.mappings[item.location].structs.push(item.structlocation);
+                        }
+                    });
+                    delete state.functions[jumpCondition.hash];
+                } else if (
+                    jumpCondition.hash in functionHashes &&
+                    state.functions[jumpCondition.hash].items.length === 1 &&
+                    state.functions[jumpCondition.hash].items[0].name === 'RETURN' &&
+                    state.functions[jumpCondition.hash].items[0].items.length === 1 &&
+                    state.functions[jumpCondition.hash].items[0].items[0].name === 'SLOAD' &&
+                    BigNumber.isInstance(
+                        state.functions[jumpCondition.hash].items[0].items[0].location
+                    )
+                ) {
+                    if (
+                        !(
+                            state.functions[jumpCondition.hash].items[0].items[0].location in
+                            state.variables
+                        )
+                    ) {
+                        const fullFunction = (functionHashes as any)[jumpCondition.hash];
+                        state.variables[
+                            state.functions[jumpCondition.hash].items[0].items[0].location
+                        ] = new Variable(fullFunction.split('(')[0], []);
+                        delete state.functions[jumpCondition.hash];
+                    } else {
+                        const fullFunction = (functionHashes as any)[jumpCondition.hash];
+                        state.variables[
+                            state.functions[jumpCondition.hash].items[0].items[0].location
+                        ].label = fullFunction.split('(')[0];
+                        delete state.functions[jumpCondition.hash];
+                    }
+                }
             }
         } else if (
             !(opcode.pc + ':' + jumpLocation.toJSNumber() in state.jumps) &&
-            jumpCondition.name === 'LT' &&
-            jumpCondition.left.name === 'CALLDATASIZE' &&
-            BigNumber.isInstance(jumpCondition.right) &&
-            jumpCondition.right.equals(4)
+            ((jumpCondition.name === 'LT' &&
+                jumpCondition.left.name === 'CALLDATASIZE' &&
+                BigNumber.isInstance(jumpCondition.right) &&
+                jumpCondition.right.equals(4)) ||
+                (jumpCondition.name === 'ISZERO' && jumpCondition.item.name === 'CALLDATASIZE'))
         ) {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
             if (jumpIndex >= 0) {
@@ -194,7 +309,11 @@ export default (opcode: Opcode, state: EVM): void => {
                     trueCloneTree.map((item: any) => stringify(item)).join('') ===
                         falseCloneTree.map((item: any) => stringify(item)).join('')
                 ) {
-                    state.functions[''] = new TopLevelFunction(trueCloneTree, '');
+                    state.functions[''] = new TopLevelFunction(
+                        trueCloneTree,
+                        '',
+                        trueCloneTree.gasUsed
+                    );
                 } else if (trueCloneTree.length > 0 && trueCloneTree[0].name !== 'REVERT') {
                     state.instructions.push(
                         new JUMPI(jumpCondition, jumpLocation, trueCloneTree, falseCloneTree)

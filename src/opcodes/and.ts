@@ -12,7 +12,7 @@ export class AND {
 
     constructor(left: any, right: any) {
         this.name = 'AND';
-        this.wrapped = false;
+        this.wrapped = true;
         this.left = left;
         this.right = right;
     }

@@ -12,7 +12,7 @@ export class JUMP {
 
     constructor(location: any, bad?: boolean) {
         this.name = 'JUMP';
-        this.wrapped = true;
+        this.wrapped = false;
         this.location = location;
         this.valid = true;
         if (bad) {

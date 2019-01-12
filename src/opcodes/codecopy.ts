@@ -11,7 +11,7 @@ export class CODECOPY {
 
     constructor(startLocation: any, copyLength: any) {
         this.name = 'CODECOPY';
-        this.wrapped = false;
+        this.wrapped = true;
         this.startLocation = startLocation;
         this.copyLength = copyLength;
     }

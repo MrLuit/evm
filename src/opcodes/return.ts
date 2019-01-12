@@ -15,7 +15,7 @@ export class RETURN {
 
     constructor(items: any, memoryStart?: any, memoryLength?: any) {
         this.name = 'RETURN';
-        this.wrapped = false;
+        this.wrapped = true;
         if (memoryStart && memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;

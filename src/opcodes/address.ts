@@ -9,7 +9,7 @@ export class ADDRESS {
     constructor() {
         this.name = 'ADDRESS';
         this.type = 'address';
-        this.wrapped = true;
+        this.wrapped = false;
     }
 
     toString() {

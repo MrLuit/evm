@@ -12,7 +12,7 @@ export class CALLDATALOAD {
 
     constructor(location: any) {
         this.name = 'CALLDATALOAD';
-        this.wrapped = true;
+        this.wrapped = false;
         this.location = location;
     }
 
