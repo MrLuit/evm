@@ -1,6 +1,6 @@
 import 'mocha';
 import { expect } from 'chai';
-import validTypes from '../utils/validTypes';
+import validTypes from './utils/validTypes';
 import * as events from '../../data/events.json';
 
 describe('events.json', () => {

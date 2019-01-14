@@ -1,4 +1,3 @@
-import * as abi from 'ethereumjs-abi';
 import * as BigNumber from '../../node_modules/big-integer';
 import * as functionHashes from '../../data/functionHashes.json';
 
@@ -79,12 +78,6 @@ export default class Transaction {
             ) {
                 return [];
             } else {
-                /*const decodedABI = abi.rawDecode(rawFunctionArguments, Buffer.from(this.input.substring(8),"hex")).map((b: any) => b.toString("hex"));
-                if(decodedABI) {
-                    return decodedABI;
-                } else {
-                    return functionArguments;
-                }*/
                 const result: string[] = [];
                 for (let i = 0; i < rawFunctionArguments.length; i++) {
                     const functionArgumentType = rawFunctionArguments[i] || 'unknown';
@@ -97,32 +90,12 @@ export default class Transaction {
                             .multiply(2)
                             .toJSNumber();
                         const data = this.input.substring(8).substr((location + 1) * 64, length);
-                        /*console.log(location);
-                        console.log(length);
-                        console.log(data);
-                        console.log('.');*/
                         result.push(parseSingle(data, functionArgumentType));
                     } else {
                         result.push(parseSingle(functionArgument, functionArgumentType));
                     }
                 }
                 return result;
-                /*return functionArguments.map((functionArgument: string, index: number) => {
-                    const functionArgumentType = rawFunctionArguments[index] || "unknown";
-                    let formattedFunctionArgument = functionArgument;
-                    if(functionArgumentType === "address") {
-                        formattedFunctionArgument = "0x" + functionArgument.substring(24);
-                    } else if(functionArgumentType === "uint256" || functionArgumentType === "uint8") {
-                        formattedFunctionArgument = BigNumber(functionArgument,16).toString();
-                    } else if(functionArgumentType === "bool") {
-                        formattedFunctionArgument = (!BigNumber(functionArgument,16).isZero()).toString();
-                    }
-                    if(descriptive) {
-                        return functionArgumentType + ' ' + formattedFunctionArgument;
-                    } else {
-                        return formattedFunctionArgument;
-                    }
-                });*/
             }
         } else {
             return functionArguments;
@@ -130,6 +103,6 @@ export default class Transaction {
     }
 
     isContractCreation(): boolean {
-        return (this.to && this.to === '0x0000000000000000000000000000000000000000') === true;
+        return this.to === null;
     }
 }
