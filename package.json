@@ -1,6 +1,6 @@
 {
   "name": "evm",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "An ethereum virtual machine (EVM) bytecode decompiler",
   "main": "lib/EVM.node.js",
   "module": "lib/EVM.js",
@@ -35,19 +35,19 @@
     "bytecode",
     "solidity"
   ],
-  "dependencies": {
-    "big-integer": "1.6.40"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/core": "7.2.2",
     "@babel/preset-env": "7.2.3",
     "@types/chai": "4.1.7",
+    "@types/ethereumjs-abi": "0.6.1",
     "@types/mocha": "5.2.5",
     "@types/node": "10.12.18",
     "@types/webpack": "4.4.22",
     "@types/webpack-merge": "4.1.3",
     "@types/webpack-node-externals": "1.6.3",
     "awesome-typescript-loader": "5.2.1",
+    "big-integer": "1.6.40",
     "chai": "4.2.0",
     "cross-env": "5.2.0",
     "ethereumjs-vm": "2.5.0",
@@ -61,6 +61,7 @@
     "tslint": "5.12.0",
     "tslint-config-prettier": "1.17.0",
     "tslint-microsoft-contrib": "6.0.0",
+    "tslint-no-unused-expression-chai": "0.1.4",
     "typescript": "3.2.2",
     "web3": "1.0.0-beta.37",
     "webpack": "4.28.3",

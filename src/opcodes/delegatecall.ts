@@ -1,11 +1,11 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
-import Instruction from '../classes/instruction.class';
 import stringify from '../utils/stringify';
 
 export class DELEGATECALL {
-    readonly type: string;
-    readonly static: boolean;
+    readonly name: string;
+    readonly type?: string;
+    readonly wrapped: boolean;
     readonly gas: any;
     readonly address: any;
     readonly memoryStart: any;
@@ -21,8 +21,8 @@ export class DELEGATECALL {
         outputStart: any,
         outputLength: any
     ) {
-        this.type = 'DELEGATECALL';
-        this.static = false;
+        this.name = 'DELEGATECALL';
+        this.wrapped = true;
         this.gas = gas;
         this.address = address;
         this.memoryStart = memoryStart;
@@ -50,16 +50,14 @@ export class DELEGATECALL {
     }
 }
 
-export default (opcode: Opcode, state: EVM): Instruction => {
+export default (opcode: Opcode, state: EVM): void => {
     const gas = state.stack.pop();
     const address = state.stack.pop();
     const memoryStart = state.stack.pop();
     const memoryLength = state.stack.pop();
     const outputStart = state.stack.pop();
     const outputLength = state.stack.pop();
-    const instruction = new Instruction(opcode.name, opcode.pc);
     state.stack.push(
         new DELEGATECALL(gas, address, memoryStart, memoryLength, outputStart, outputLength)
     );
-    return instruction;
 };

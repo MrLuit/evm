@@ -1,10 +1,7 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
-import Instruction from '../classes/instruction.class';
 
-export default (opcode: Opcode, state: EVM): Instruction => {
+export default (opcode: Opcode, state: EVM): void => {
     const duplicateLocation = parseInt(opcode.name.replace('DUP', ''), 10) - 1;
-    const instruction = new Instruction(opcode.name, opcode.pc);
     state.stack.duplicate(duplicateLocation);
-    return instruction;
 };

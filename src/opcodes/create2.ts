@@ -1,18 +1,18 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
-import Instruction from '../classes/instruction.class';
 import stringify from '../utils/stringify';
 
 export class CREATE2 {
-    readonly type: string;
-    readonly static: boolean;
+    readonly name: string;
+    readonly type?: string;
+    readonly wrapped: boolean;
     readonly memoryStart: any;
     readonly memoryLength: any;
     readonly value: any;
 
     constructor(memoryStart: any, memoryLength: any, value: any) {
-        this.type = 'CREATE2';
-        this.static = false;
+        this.name = 'CREATE2';
+        this.wrapped = true;
         this.memoryStart = memoryStart;
         this.memoryLength = memoryLength;
         this.value = value;
@@ -33,11 +33,9 @@ export class CREATE2 {
     }
 }
 
-export default (opcode: Opcode, state: EVM): Instruction => {
+export default (opcode: Opcode, state: EVM): void => {
     const value = state.stack.pop();
     const memoryStart = state.stack.pop();
     const memoryLength = state.stack.pop();
-    const instruction = new Instruction(opcode.name, opcode.pc);
     state.stack.push(new CREATE2(memoryStart, memoryLength, value));
-    return instruction;
 };

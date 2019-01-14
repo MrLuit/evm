@@ -1,18 +1,18 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
-import Instruction from '../classes/instruction.class';
 import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class AND {
-    readonly type: string;
-    readonly static: boolean;
+    readonly name: string;
+    readonly type?: string;
+    readonly wrapped: boolean;
     readonly left: any;
     readonly right: any;
 
     constructor(left: any, right: any) {
-        this.type = 'AND';
-        this.static = false;
+        this.name = 'AND';
+        this.wrapped = true;
         this.left = left;
         this.right = right;
     }
@@ -22,10 +22,9 @@ export class AND {
     }
 }
 
-export default (opcode: Opcode, state: EVM): Instruction => {
+export default (opcode: Opcode, state: EVM): void => {
     const left = state.stack.pop();
     const right = state.stack.pop();
-    const instruction = new Instruction(opcode.name, opcode.pc);
     if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
         state.stack.push(left.and(right));
     } else if (BigNumber.isInstance(left) && /^[f]+$/.test(left.toString(16))) {
@@ -56,5 +55,4 @@ export default (opcode: Opcode, state: EVM): Instruction => {
     } else {
         state.stack.push(new AND(left, right));
     }
-    return instruction;
 };
