@@ -43,7 +43,6 @@ export default (opcode: Opcode, state: EVM): void => {
         } else {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
             if (!(opcode.pc + ':' + jumpLocation.toJSNumber() in state.jumps)) {
-                state.jumps[opcode.pc + ':' + jumpLocation.toJSNumber()] = true;
                 if (!jumpLocationData || jumpLocationData.name !== 'JUMPDEST') {
                     state.halted = true;
                     state.instructions.push(new JUMP(jumpLocation, true));
@@ -52,8 +51,15 @@ export default (opcode: Opcode, state: EVM): void => {
                     jumpIndex >= 0 &&
                     jumpLocationData.name === 'JUMPDEST'
                 ) {
-                    state.pc = jumpIndex - 1;
+                    state.jumps[opcode.pc + ':' + jumpLocation.toJSNumber()] = true;
+                    state.pc = jumpIndex;
+                } else {
+                    state.halted = true;
+                    state.instructions.push(new JUMP(jumpLocation, true));
                 }
+            } else {
+                state.halted = true;
+                state.instructions.push(new JUMP(jumpLocation));
             }
         }
     }

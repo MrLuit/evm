@@ -72,7 +72,13 @@ export class SLOAD {
 
     toString() {
         if (BigNumber.isInstance(this.location) && this.location.toString() in this.variables()) {
-            return this.variables()[this.location.toString()].label;
+            if (this.variables()[this.location.toString()].label) {
+                return this.variables()[this.location.toString()].label;
+            } else {
+                return (
+                    'var' + (Object.keys(this.variables()).indexOf(this.location.toString()) + 1)
+                );
+            }
         } else {
             return 'storage[' + stringify(this.location) + ']';
         }

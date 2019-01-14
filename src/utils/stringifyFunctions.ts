@@ -32,7 +32,7 @@ export default (functionName: string, functionInstance: any): string => {
         output += ' payable';
     }
     if (functionInstance.returns.length > 0) {
-        output += ' returns(' + functionInstance.returns.join(', ') + ')';
+        output += ' returns (' + functionInstance.returns.join(', ') + ')';
     }
     output += ' {\n';
     output += stringifyInstructions(functionInstance.items, 4);

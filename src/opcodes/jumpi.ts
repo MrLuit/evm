@@ -32,6 +32,7 @@ const findReturns = (item: any) => {
             if (
                 typeof item[i] === 'object' &&
                 item[i].name === 'RETURN' &&
+                item[i].items &&
                 item[i].items.length > 0
             ) {
                 returns.push(item[i].items);
@@ -306,6 +307,7 @@ export default (opcode: Opcode, state: EVM): void => {
                     trueCloneTree.length > 0 &&
                     trueCloneTree.length === falseCloneTree.length &&
                     trueCloneTree[0].name !== 'REVERT' &&
+                    trueCloneTree[0].name !== 'INVALID' &&
                     trueCloneTree.map((item: any) => stringify(item)).join('') ===
                         falseCloneTree.map((item: any) => stringify(item)).join('')
                 ) {
@@ -314,11 +316,17 @@ export default (opcode: Opcode, state: EVM): void => {
                         '',
                         trueCloneTree.gasUsed
                     );
-                } else if (trueCloneTree.length > 0 && trueCloneTree[0].name !== 'REVERT') {
+                } else if (
+                    trueCloneTree.length > 0 &&
+                    trueCloneTree[0].name !== 'REVERT' &&
+                    trueCloneTree[0].name !== 'INVALID'
+                ) {
                     state.instructions.push(
                         new JUMPI(jumpCondition, jumpLocation, trueCloneTree, falseCloneTree)
                     );
                 }
+            } else {
+                state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
             }
         } else if (!(opcode.pc + ':' + jumpLocation.toJSNumber() in state.jumps)) {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
@@ -346,6 +354,8 @@ export default (opcode: Opcode, state: EVM): void => {
                         new JUMPI(jumpCondition, jumpLocation, trueCloneTree, falseCloneTree)
                     );
                 }
+            } else {
+                state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
             }
         } else {
             state.instructions.push(new JUMPI(jumpCondition, jumpLocation, null, null, true));

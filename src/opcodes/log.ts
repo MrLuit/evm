@@ -53,6 +53,16 @@ export default (opcode: Opcode, state: EVM): void => {
     for (let i = 0; i < topicsCount; i++) {
         topics.push(state.stack.pop());
     }
+    if (topics.length > 0) {
+        const eventTopic = topics[0].toString(16);
+        if (!(eventTopic in state.events)) {
+            state.events[eventTopic] = {};
+            state.events[eventTopic].indexedCount = topics.length - 1;
+            if (eventTopic in eventHashes) {
+                state.events[eventTopic].label = (eventHashes as any)[eventTopic];
+            }
+        }
+    }
     if (BigNumber.isInstance(memoryStart) && BigNumber.isInstance(memoryLength)) {
         const items = [];
         for (
@@ -65,6 +75,12 @@ export default (opcode: Opcode, state: EVM): void => {
             } else {
                 items.push(new MLOAD(i));
             }
+        }
+        if (topics.length === 0) {
+            if (!('anonymous' in state.events)) {
+                state.events.anonymous = [];
+            }
+            state.events.anonymous.push({ items });
         }
         state.instructions.push(new LOG(topics, items));
     } else {

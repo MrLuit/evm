@@ -115,7 +115,12 @@ export class SSTORE {
     toString() {
         let variableName = 'storage[' + stringify(this.location) + ']';
         if (BigNumber.isInstance(this.location) && this.location.toString() in this.variables()) {
-            variableName = this.variables()[this.location.toString()].label;
+            if (this.variables()[this.location.toString()].label) {
+                variableName = this.variables()[this.location.toString()].label;
+            } else {
+                variableName =
+                    'var' + (Object.keys(this.variables()).indexOf(this.location.toString()) + 1);
+            }
         }
         if (
             this.data.name === 'ADD' &&

@@ -29,6 +29,7 @@ class EVM {
     halted: boolean;
     functions: any;
     variables: any;
+    events: any;
     gasUsed: number;
 
     constructor(code: string | Buffer) {
@@ -44,6 +45,7 @@ class EVM {
         this.halted = false;
         this.functions = {};
         this.variables = {};
+        this.events = {};
         this.gasUsed = 0;
         if (code instanceof Buffer) {
             this.code = code;
@@ -64,6 +66,7 @@ class EVM {
         clone.layer = this.layer + 1;
         clone.functions = this.functions;
         clone.variables = this.variables;
+        clone.events = this.events;
         clone.gasUsed = this.gasUsed;
         return clone;
     }
@@ -146,6 +149,7 @@ class EVM {
         this.mappings = {};
         this.functions = {};
         this.variables = {};
+        this.events = {};
     }
 
     parse(): any[] {
@@ -166,7 +170,7 @@ class EVM {
 
     decompile(): string {
         const instructionTree = this.parse();
-        const events = stringifyEvents(this.getEvents());
+        const events = stringifyEvents(this.events, this.getEvents());
         const structs = stringifyStructs(this.mappings);
         const mappings = stringifyMappings(this.mappings);
         const variables = stringifyVariables(this.variables);

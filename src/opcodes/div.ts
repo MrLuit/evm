@@ -27,6 +27,8 @@ export default (opcode: Opcode, state: EVM): void => {
     const right = state.stack.pop();
     if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
         state.stack.push(left.divide(right));
+    } else if (BigNumber.isInstance(right) && right.equals(1)) {
+        state.stack.push(left);
     } else {
         state.stack.push(new DIV(left, right));
     }
