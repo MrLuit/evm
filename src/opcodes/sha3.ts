@@ -24,7 +24,19 @@ export class SHA3 {
     }
 
     toString() {
-        return 'keccak256(' + this.items.map((item: any) => stringify(item)).join(', ') + ')';
+        if (this.items) {
+            return 'keccak256(' + this.items.map((item: any) => stringify(item)).join(', ') + ')';
+        } else {
+            return (
+                'keccak256(memory[' +
+                stringify(this.memoryStart) +
+                ':(' +
+                stringify(this.memoryStart) +
+                '+' +
+                stringify(this.memoryLength) +
+                ')])'
+            );
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 const findOpcode = require('../../node_modules/ethereumjs-vm/dist/opcodes.js');
 import * as functionHashes from '../../data/functionHashes.json';
 import * as eventHashes from '../../data/eventHashes.json';
-import allOpcodes from '../utils/opcodes';
+import opcodeFunctions from '../utils/opcodes';
 import stringifyEvents from '../utils/stringifyEvents';
 import stringifyStructs from '../utils/stringifyStructs';
 import stringifyMappings from '../utils/stringifyMappings';
@@ -12,7 +12,6 @@ import Opcode from '../interfaces/opcode.interface';
 import Stack from './stack.class';
 import Memory from '../interfaces/memory.interface';
 import Storage from '../interfaces/storage.interface';
-/*import Mappings from '../interfaces/mappings.interface';*/
 import Jumps from '../interfaces/jumps.interface';
 
 class EVM {
@@ -24,7 +23,7 @@ class EVM {
     storage: Storage;
     jumps: Jumps;
     code: Buffer;
-    mappings: any; /*Mappings;*/
+    mappings: any;
     layer: number;
     halted: boolean;
     functions: any;
@@ -150,6 +149,7 @@ class EVM {
         this.functions = {};
         this.variables = {};
         this.events = {};
+        this.gasUsed = 0;
     }
 
     parse(): any[] {
@@ -158,10 +158,10 @@ class EVM {
             for (this.pc; this.pc < opcodes.length && !this.halted; this.pc++) {
                 const opcode = opcodes[this.pc];
                 this.gasUsed += opcode.fee;
-                if (!(opcode.name in allOpcodes)) {
+                if (!(opcode.name in opcodeFunctions)) {
                     throw new Error('Unknown OPCODE: ' + opcode.name);
                 } else {
-                    (allOpcodes as any)[opcode.name](opcode, this);
+                    (opcodeFunctions as any)[opcode.name](opcode, this);
                 }
             }
         }

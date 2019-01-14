@@ -6,7 +6,7 @@ import stringify from '../utils/stringify';
 const parseMapping = (...items: any[]) => {
     const mappings: any = [];
     items.forEach((item2: any) => {
-        if (item2.name === 'SHA3') {
+        if (item2.name === 'SHA3' && item2.items) {
             mappings.push(...parseMapping(...item2.items));
         } else {
             mappings.push(item2);

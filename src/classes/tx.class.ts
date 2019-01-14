@@ -25,6 +25,35 @@ export default class Transaction {
     to?: string;
     value?: number;
 
+    constructor(transactionObject?: any) {
+        if (transactionObject) {
+            if ('blockHash' in transactionObject) {
+                this.blockHash = transactionObject.blockHash;
+            }
+            if ('blockNumber' in transactionObject) {
+                this.blockNumber = transactionObject.blockNumber;
+            }
+            if ('from' in transactionObject) {
+                this.from = transactionObject.from;
+            }
+            if ('gas' in transactionObject) {
+                this.gas = transactionObject.gas;
+            }
+            if ('gasPrice' in transactionObject) {
+                this.gasPrice = transactionObject.gasPrice;
+            }
+            if ('input' in transactionObject) {
+                this.input = transactionObject.input.replace('0x', '');
+            }
+            if ('to' in transactionObject) {
+                this.to = transactionObject.to;
+            }
+            if ('value' in transactionObject) {
+                this.value = transactionObject.value;
+            }
+        }
+    }
+
     setInput(input: string): void {
         this.input = input.replace('0x', '');
     }
