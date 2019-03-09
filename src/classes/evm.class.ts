@@ -216,4 +216,8 @@ export default class EVM {
         const code = stringifyInstructions(instructionTree);
         return events + structs + mappings + variables + functions + code;
     }
+
+    isERC165(): boolean {
+        return ['supportsInterface(bytes4)'].every(v => this.getFunctions().includes(v));
+    }
 }

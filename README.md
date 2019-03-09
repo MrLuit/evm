@@ -15,6 +15,7 @@ An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising
 - **Reading information like events or functions from either bytecode or tx data**
 - **Extracting the [swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (if any) from bytecode**
 - **Checking whether an opcode exists and is reachable within bytecode**
+- **Detecting whether contracts are compliant to certain ERCs**
 
 ## API
 
@@ -30,6 +31,7 @@ An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising
 * **reset()** - _Reset the EVM state (stack, memory, etc.)_
 * **parse()** - _Interpret opcodes by looping over them, returns array of interpreted opcodes_
 * **decompile()** - _Decompile bytecode into readable [Solidity](https://en.wikipedia.org/wiki/Solidity)-like pseudocode_
+* **isERC165()** - _Detect whether contract is [ERC165](https://eips.ethereum.org/EIPS/eip-165)-compliant_
 
 ## Examples
 
@@ -74,6 +76,7 @@ web3.eth.getCode("0x06012c8cf97BEaD5deAe237070F9587f8E7A266d").then(code => {  /
     console.log(evm.getEvents());  /* Get events */
     console.log(evm.decompile());  /* Decompile bytecode */
     console.log(evm.containsOpcode("SELFDESTRUCT")); /* Check whether contract contains a SELFDESTRUCT */
+    console.log(evm.isERC165()); /* Detect whether contract is ERC165-compliant */
 });
 ```
 
@@ -88,6 +91,7 @@ web3.eth.getCode("0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359", function(err,code
     console.log(evm.getEvents());  /* Get events */
     console.log(evm.decompile());  /* Decompile bytecode */
     console.log(evm.containsOpcode("SELFDESTRUCT")); /* Check whether contract contains a SELFDESTRUCT */
+    console.log(evm.isERC165()); /* Detect whether contract is ERC165-compliant */
 });
 ```
 

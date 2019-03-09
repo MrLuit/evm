@@ -53,6 +53,20 @@ describe('contracts', () => {
             expect(evm.containsOpcode('SELFDESTRUCT')).to.be.false;
         });
     });
+
+    describe('erc165.sol', () => {
+        const contract = new Contract();
+        contract.loadFile('erc165.sol');
+        const evm = new EVM(contract.bytecode());
+
+        it('should compile without errors', () => {
+            expect(contract.valid(), contract.errors().join('\n')).to.be.true;
+        });
+
+        it('should detect ERC165', () => {
+            expect(evm.isERC165()).to.be.true;
+        });
+    });
 });
 
 describe('data', () => {
