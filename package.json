@@ -20,7 +20,7 @@
     "type": "git",
     "url": "git+https://github.com/MrLuit/evm.git"
   },
-  "author": "Luit",
+  "author": "Luit Hollander <luit@hollander.email> (https://luit.me)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/MrLuit/evm/issues"
