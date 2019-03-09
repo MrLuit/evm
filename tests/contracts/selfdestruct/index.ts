@@ -6,7 +6,7 @@ import Contract from '../../utils/contract.class';
 
 describe('selfdestruct.sol', () => {
     const contract = new Contract();
-    contract.loadFile('selfdestruct/selfdestruct.sol');
+    contract.loadFile('selfdestruct/contract.sol');
     const evm = new EVM(contract.bytecode());
 
     it('should compile without errors', () => {

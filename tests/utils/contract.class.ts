@@ -55,11 +55,15 @@ export default class Contract {
     }
 
     bytecode() {
-        const { contracts } = this.output;
-        const filename = Object.keys(contracts)[0];
-        const contract = contracts[filename];
-        const name = Object.keys(contract)[0];
-        const bytecode = contract[name].evm.deployedBytecode.object;
-        return bytecode;
+        if (this.valid()) {
+            const { contracts } = this.output;
+            const filename = Object.keys(contracts)[0];
+            const contract = contracts[filename];
+            const name = Object.keys(contract)[0];
+            const bytecode = contract[name].evm.deployedBytecode.object;
+            return bytecode;
+        } else {
+            return '0x';
+        }
     }
 }

@@ -1,10 +1,15 @@
 import 'mocha';
 
+describe('classes', () => {
+    require('./classes/evm.class');
+    require('./classes/stack.class');
+});
+
 describe('contracts', () => {
+    require('./contracts/erc165');
     require('./contracts/hello_world');
     require('./contracts/selfdestruct');
     require('./contracts/metadata');
-    require('./contracts/erc165');
 });
 
 describe('data', () => {
@@ -17,9 +22,4 @@ describe('opcodes', () => {
     require('./opcodes/push');
     require('./opcodes/stop');
     require('./opcodes/sub');
-});
-
-describe('classes', () => {
-    require('./classes/evm.class');
-    require('./classes/stack.class');
 });

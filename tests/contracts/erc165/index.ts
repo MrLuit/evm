@@ -5,7 +5,7 @@ import Contract from '../../utils/contract.class';
 
 describe('erc165.sol', () => {
     const contract = new Contract();
-    contract.loadFile('erc165/erc165.sol');
+    contract.loadFile('erc165/contract.sol');
     const evm = new EVM(contract.bytecode());
 
     it('should compile without errors', () => {

@@ -6,13 +6,13 @@ import Contract from '../../utils/contract.class';
 import EVM from '../../../src/classes/evm.class';
 import { SELFDESTRUCT } from '../../../src/opcodes';
 
-const metadata = fs.readFileSync('./tests/contracts/metadata/metadata.sol', 'utf8');
+const metadata = fs.readFileSync('./tests/contracts/metadata/contract.sol', 'utf8');
 
 const generateFFMetadataContract = () => {
     while (true) {
         const contract = new Contract();
         const randomData = crypto.randomBytes(16).toString('hex');
-        contract.load('metadata.sol', metadata.replace('[randomData]', randomData));
+        contract.load('contract.sol', metadata.replace('[randomData]', randomData));
         const evm = new EVM(contract.bytecode());
         const swarmHash = evm.getSwarmHash();
         if (swarmHash && typeof swarmHash === 'string' && swarmHash.includes('ff')) {
