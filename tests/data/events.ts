@@ -1,7 +1,19 @@
 import 'mocha';
 import { expect } from 'chai';
-import validTypes from '../utils/validTypes';
 import * as events from '../../data/events.json';
+
+const validTypes = ['bool', 'string', 'address', 'bytes'];
+
+for (let i = 1; i <= 32; i++) {
+    validTypes.push('bytes' + i);
+}
+
+for (let i = 8; i <= 256; i += 8) {
+    validTypes.push('uint' + i);
+    validTypes.push('int' + i);
+}
+
+validTypes.forEach(type => validTypes.push(type + '[]'));
 
 describe('events.json', () => {
     it('should not contain duplicates', () => {
