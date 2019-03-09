@@ -17,6 +17,7 @@ describe('contracts', () => {
 
         it('should not detect selfdestruct', () => {
             expect(evm.containsOpcode(SELFDESTRUCT)).to.be.false;
+            expect(evm.containsOpcode('SELFDESTRUCT')).to.be.false;
         });
     });
 
@@ -31,6 +32,7 @@ describe('contracts', () => {
 
         it('should detect selfdestruct', () => {
             expect(evm.containsOpcode(SELFDESTRUCT)).to.be.true;
+            expect(evm.containsOpcode('SELFDESTRUCT')).to.be.true;
         });
     });
 
@@ -48,6 +50,7 @@ describe('contracts', () => {
 
         it('should not detect selfdestruct', () => {
             expect(evm.containsOpcode(SELFDESTRUCT)).to.be.false;
+            expect(evm.containsOpcode('SELFDESTRUCT')).to.be.false;
         });
     });
 });

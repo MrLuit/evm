@@ -14,6 +14,7 @@ An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising
 - **Converting bytecode to opcodes**
 - **Reading information like events or functions from either bytecode or tx data**
 - **Extracting the [swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (if any) from bytecode**
+- **Checking whether an opcode exists and is reachable within bytecode**
 
 ## API
 
@@ -23,6 +24,7 @@ An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising
 * **getOpcodes()** - _Returns opcodes including pc and pushData (if included)_
 * **getFunctions()** - _Parse functions from their signatures in bytecode_
 * **getEvents()** - _Parse events from their signatures in bytecode_
+- **containsOpcode(opcode)** - _Check whether an opcode exists and is reachable within bytecode_
 * **getJumpDestinations()** - _Get array of program counters from JUMPDEST opcodes_
 * **getSwarmHash()** - _Get [Swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (if any) for [contract metadata](https://solidity.readthedocs.io/en/v0.5.2/metadata.html)_
 * **reset()** - _Reset the EVM state (stack, memory, etc.)_
@@ -71,6 +73,7 @@ web3.eth.getCode("0x06012c8cf97BEaD5deAe237070F9587f8E7A266d").then(code => {  /
     console.log(evm.getFunctions());  /* Get functions */
     console.log(evm.getEvents());  /* Get events */
     console.log(evm.decompile());  /* Decompile bytecode */
+    console.log(evm.containsOpcode("SELFDESTRUCT")); /* Check whether contract contains a SELFDESTRUCT */
 });
 ```
 
@@ -84,6 +87,7 @@ web3.eth.getCode("0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359", function(err,code
     console.log(evm.getFunctions());  /* Get functions */
     console.log(evm.getEvents());  /* Get events */
     console.log(evm.decompile());  /* Decompile bytecode */
+    console.log(evm.containsOpcode("SELFDESTRUCT")); /* Check whether contract contains a SELFDESTRUCT */
 });
 ```
 

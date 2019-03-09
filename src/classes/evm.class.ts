@@ -22,7 +22,8 @@ import {
     PUSH32,
     JUMPDEST,
     SELFDESTRUCT,
-    codes
+    codes,
+    names
 } from '../opcodes';
 
 export default class EVM {
@@ -120,8 +121,13 @@ export default class EVM {
         ];
     }
 
-    containsOpcode(opcode: number): boolean {
+    containsOpcode(opcode: number | string): boolean {
         let halted = false;
+        if (typeof opcode === 'string' && opcode in names) {
+            opcode = (names as any)[opcode];
+        } else if (typeof opcode === 'string') {
+            throw new Error('Invalid opcode provided');
+        }
         for (let index = 0; index < this.code.length; index++) {
             const currentOpcode = this.code[index];
             if (currentOpcode === opcode && !halted) {
@@ -186,7 +192,6 @@ export default class EVM {
             const opcodes = this.getOpcodes();
             for (this.pc; this.pc < opcodes.length && !this.halted; this.pc++) {
                 const opcode = opcodes[this.pc];
-                //console.log(opcode.pc + ': ' + opcode.name);
                 if (!(opcode.name in opcodeFunctions)) {
                     throw new Error('Unknown OPCODE: ' + opcode.name);
                 } else {
