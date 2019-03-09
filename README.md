@@ -4,7 +4,7 @@
 [![](https://img.shields.io/david/MrLuit/evm.svg?style=flat-square)](https://david-dm.org/MrLuit/evm)
 [![](https://img.shields.io/github/license/MrLuit/evm.svg?style=flat-square)](https://github.com/MrLuit/evm/blob/master/LICENSE)
     
-An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising-the-ethereum-virtual-machine-58457e61ca15) interpreter and decompiler, along with several other utils for programmatically extracting information from bytecode.
+An [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethereum-virtual-machine-how-does-it-work-9abac2b7c9e) interpreter and decompiler, along with several other utils for programmatically extracting information from bytecode.
 
 ## Usage
 
