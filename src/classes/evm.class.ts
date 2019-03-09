@@ -25,7 +25,7 @@ import {
     codes
 } from '../opcodes';
 
-class EVM {
+export default class EVM {
     pc: number = 0;
     stack: Stack = new Stack();
     memory: any = {};
@@ -212,5 +212,3 @@ class EVM {
         return events + structs + mappings + variables + functions + code;
     }
 }
-
-export default EVM;

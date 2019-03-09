@@ -10,4 +10,6 @@ export const events: any = _events as any;
 export const functionHashes: any = _functionHashes as any;
 export const eventHashes: any = _eventHashes as any;
 
+export * from './opcodes';
+
 export { EVM, Transaction };
