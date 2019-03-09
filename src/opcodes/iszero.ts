@@ -18,7 +18,11 @@ export class ISZERO {
     }
 
     toString() {
-        return stringify(this.item) + ' == 0';
+        if (this.item.name === 'EQ') {
+            return stringify(this.item.left) + ' != ' + stringify(this.item.right);
+        } else {
+            return stringify(this.item) + ' == 0';
+        }
     }
 }
 
@@ -43,6 +47,4 @@ export default (opcode: Opcode, state: EVM): void => {
     } else {
         state.stack.push(new ISZERO(item));
     }
-    /* == -> != */
-    /* != -> == */
 };

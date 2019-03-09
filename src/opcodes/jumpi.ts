@@ -51,6 +51,7 @@ const findReturns = (item: any) => {
 export class TopLevelFunction {
     readonly name: string;
     readonly type?: string;
+    readonly label: string;
     readonly hash: any;
     readonly gasUsed: number;
     readonly payable: boolean;
@@ -68,6 +69,11 @@ export class TopLevelFunction {
         this.visibility = 'public';
         this.constant = false;
         this.returns = [];
+        if (this.hash in functionHashes) {
+            this.label = (functionHashes as any)[this.hash];
+        } else {
+            this.label = this.hash + '()';
+        }
         if (
             this.items.length > 0 &&
             this.items[0] instanceof REQUIRE &&
@@ -198,6 +204,7 @@ export class JUMPI {
         } else if (this.valid) {
             return 'if' + stringify(this.condition) + ' goto(' + stringify(this.location) + ');';
         } else {
+            console.log(this);
             return "revert(\"Bad jump destination\");";
         }
     }
@@ -207,14 +214,18 @@ export default (opcode: Opcode, state: EVM): void => {
     const jumpLocation = state.stack.pop();
     const jumpCondition = state.stack.pop();
     const opcodes = state.getOpcodes();
+    console.log(jumpLocation);
+    console.log(state.conditions);
+    console.log('-');
     if (!BigNumber.isInstance(jumpLocation)) {
         state.halted = true;
         state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
     } else {
         const jumpLocationData = opcodes.find((o: any) => o.pc === jumpLocation.toJSNumber());
         if (!jumpLocationData || jumpLocationData.name !== 'JUMPDEST') {
-            state.halted = true;
-            state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
+            //state.halted = true;
+            //state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
+            state.instructions.push(new REQUIRE(jumpCondition));
         } else if (BigNumber.isInstance(jumpCondition)) {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
             if (
@@ -299,6 +310,7 @@ export default (opcode: Opcode, state: EVM): void => {
                 state.halted = true;
                 const trueClone: any = state.clone();
                 trueClone.pc = jumpIndex;
+                trueClone.conditions.push(jumpCondition);
                 const trueCloneTree = trueClone.parse();
                 const falseClone = state.clone();
                 falseClone.pc = state.pc + 1;
@@ -335,6 +347,7 @@ export default (opcode: Opcode, state: EVM): void => {
                 state.halted = true;
                 const trueClone: any = state.clone();
                 trueClone.pc = jumpIndex;
+                trueClone.conditions.push(jumpCondition);
                 const trueCloneTree = trueClone.parse();
                 const falseClone = state.clone();
                 falseClone.pc = state.pc + 1;
@@ -347,8 +360,24 @@ export default (opcode: Opcode, state: EVM): void => {
                             falseCloneTree[0].items.length === 0)) ||
                     falseCloneTree[0].name === 'INVALID'
                 ) {
-                    state.instructions.push(new REQUIRE(jumpCondition));
-                    state.instructions.push(...trueCloneTree);
+                    if (
+                        jumpCondition.name === 'CALL' &&
+                        BigNumber.isInstance(jumpCondition.memoryLength) &&
+                        jumpCondition.memoryLength.isZero() &&
+                        BigNumber.isInstance(jumpCondition.outputLength) &&
+                        jumpCondition.outputLength.isZero() &&
+                        jumpCondition.gas.name === 'MUL' &&
+                        jumpCondition.gas.left.name === 'ISZERO' &&
+                        BigNumber.isInstance(jumpCondition.gas.right) &&
+                        jumpCondition.gas.right.equals(2300)
+                    ) {
+                        jumpCondition.throwOnFail = true;
+                        state.instructions.push(jumpCondition);
+                        state.instructions.push(...trueCloneTree);
+                    } else {
+                        state.instructions.push(new REQUIRE(jumpCondition));
+                        state.instructions.push(...trueCloneTree);
+                    }
                 } else {
                     state.instructions.push(
                         new JUMPI(jumpCondition, jumpLocation, trueCloneTree, falseCloneTree)

@@ -37,10 +37,10 @@ export class LOG {
     toString() {
         if (this.eventName) {
             return (
-                'emit ' + this.eventName + '(' + [...this.topics, ...this.items].join(', ') + ')'
+                'emit ' + this.eventName + '(' + [...this.topics, ...this.items].join(', ') + ');'
             );
         } else {
-            return 'log(' + [...this.topics, ...this.items].join(', ') + ')';
+            return 'log(' + [...this.topics, ...this.items].join(', ') + ');';
         }
     }
 }

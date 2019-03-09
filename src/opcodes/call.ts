@@ -1,5 +1,6 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
+import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class CALL {
@@ -13,6 +14,7 @@ export class CALL {
     readonly memoryLength: any;
     readonly outputStart: any;
     readonly outputLength: any;
+    readonly throwOnFail: boolean;
 
     constructor(
         gas: any,
@@ -24,7 +26,7 @@ export class CALL {
         outputLength: any
     ) {
         this.name = 'CALL';
-        this.wrapped = true;
+        this.wrapped = false;
         this.gas = gas;
         this.address = address;
         this.value = value;
@@ -32,26 +34,69 @@ export class CALL {
         this.memoryLength = memoryLength;
         this.outputStart = outputStart;
         this.outputLength = outputLength;
+        this.throwOnFail = false;
     }
 
     toString() {
-        return (
-            'call(' +
-            stringify(this.gas) +
-            ',' +
-            stringify(this.address) +
-            ',' +
-            stringify(this.value) +
-            ',' +
-            stringify(this.memoryStart) +
-            ',' +
-            stringify(this.memoryLength) +
-            ',' +
-            stringify(this.outputStart) +
-            ',' +
-            stringify(this.outputLength) +
-            ')'
-        );
+        if (
+            BigNumber.isInstance(this.memoryLength) &&
+            this.memoryLength.isZero() &&
+            BigNumber.isInstance(this.outputLength) &&
+            this.outputLength.isZero()
+        ) {
+            if (
+                this.gas.name === 'MUL' &&
+                this.gas.left.name === 'ISZERO' &&
+                BigNumber.isInstance(this.gas.right) &&
+                this.gas.right.equals(2300)
+            ) {
+                if (this.throwOnFail) {
+                    return (
+                        'address(' +
+                        stringify(this.address) +
+                        ').transfer(' +
+                        stringify(this.value) +
+                        ')'
+                    );
+                } else {
+                    return (
+                        'address(' +
+                        stringify(this.address) +
+                        ').send(' +
+                        stringify(this.value) +
+                        ')'
+                    );
+                }
+            } else {
+                return (
+                    'address(' +
+                    stringify(this.address) +
+                    ').call.gas(' +
+                    stringify(this.gas) +
+                    ').value(' +
+                    stringify(this.value) +
+                    ')'
+                );
+            }
+        } else {
+            return (
+                'call(' +
+                stringify(this.gas) +
+                ',' +
+                stringify(this.address) +
+                ',' +
+                stringify(this.value) +
+                ',' +
+                stringify(this.memoryStart) +
+                ',' +
+                stringify(this.memoryLength) +
+                ',' +
+                stringify(this.outputStart) +
+                ',' +
+                stringify(this.outputLength) +
+                ')'
+            );
+        }
     }
 }
 
@@ -66,4 +111,5 @@ export default (opcode: Opcode, state: EVM): void => {
     state.stack.push(
         new CALL(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
     );
+    state.memory[outputStart] = 'output';
 };

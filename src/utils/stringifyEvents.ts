@@ -22,7 +22,7 @@ export default (stateEvents: any, events: string[]) => {
                     }
                 })
                 .join(', ');
-            output += ')';
+            output += ');';
         } else {
             output += event;
         }

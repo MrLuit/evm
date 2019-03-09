@@ -1,4 +1,3 @@
-const findOpcode = require('../../node_modules/ethereumjs-vm/dist/opcodes.js');
 import * as functionHashes from '../../data/functionHashes.json';
 import * as eventHashes from '../../data/eventHashes.json';
 import opcodeFunctions from '../utils/opcodes';
@@ -8,44 +7,43 @@ import stringifyMappings from '../utils/stringifyMappings';
 import stringifyVariables from '../utils/stringifyVariables';
 import stringifyFunctions from '../utils/stringifyFunctions';
 import stringifyInstructions from '../utils/stringifyInstructions';
-import Opcode from '../interfaces/opcode.interface';
 import Stack from './stack.class';
-import Memory from '../interfaces/memory.interface';
-import Storage from '../interfaces/storage.interface';
-import Jumps from '../interfaces/jumps.interface';
+import Event from '../interfaces/event.interface';
+import Instruction from '../interfaces/instruction.interface';
+import Mapping from '../interfaces/mapping.interface';
+import Opcode from '../interfaces/opcode.interface';
+import Variable from '../interfaces/variable.interface';
+import {
+    STOP,
+    RETURN,
+    REVERT,
+    INVALID,
+    PUSH1,
+    PUSH32,
+    JUMPDEST,
+    SELFDESTRUCT,
+    codes
+} from '../opcodes';
 
 class EVM {
-    pc: number;
-    stack: Stack;
-    memory: Memory;
-    opcodes: Opcode[];
-    instructions: any;
-    storage: Storage;
-    jumps: Jumps;
+    pc: number = 0;
+    stack: Stack = new Stack();
+    memory: any = {};
+    opcodes: Opcode[] = [];
+    instructions: Instruction[] = [];
+    storage: any = {};
+    jumps: any = {};
     code: Buffer;
-    mappings: any;
-    layer: number;
-    halted: boolean;
-    functions: any;
-    variables: any;
-    events: any;
-    gasUsed: number;
+    mappings: Mapping = {};
+    layer: number = 0;
+    halted: boolean = false;
+    functions: any = {};
+    variables: Variable = {};
+    events: Event = {};
+    gasUsed: number = 0;
+    conditions: any = [];
 
     constructor(code: string | Buffer) {
-        this.pc = 0;
-        this.opcodes = [];
-        this.instructions = [];
-        this.stack = new Stack();
-        this.memory = {};
-        this.storage = {};
-        this.jumps = {};
-        this.mappings = {};
-        this.layer = 0;
-        this.halted = false;
-        this.functions = {};
-        this.variables = {};
-        this.events = {};
-        this.gasUsed = 0;
         if (code instanceof Buffer) {
             this.code = code;
         } else {
@@ -67,6 +65,7 @@ class EVM {
         clone.variables = this.variables;
         clone.events = this.events;
         clone.gasUsed = this.gasUsed;
+        clone.conditions = [...this.conditions];
         return clone;
     }
 
@@ -77,8 +76,14 @@ class EVM {
     getOpcodes(): Opcode[] {
         if (this.opcodes.length === 0) {
             for (let index = 0; index < this.code.length; index++) {
-                const currentOp = findOpcode(this.code[index], true);
-                currentOp.pc = index;
+                const currentOp: Opcode = {
+                    pc: index,
+                    opcode: this.code[index],
+                    name: 'INVALID'
+                };
+                if (currentOp.opcode in codes) {
+                    currentOp.name = (codes as any)[this.code[index]];
+                }
                 this.opcodes.push(currentOp);
                 if (currentOp.name.startsWith('PUSH')) {
                     const pushDataLength = this.code[index] - 0x5f;
@@ -115,19 +120,30 @@ class EVM {
         ];
     }
 
+    containsOpcode(opcode: number): boolean {
+        let halted = false;
+        for (let index = 0; index < this.code.length; index++) {
+            const currentOpcode = this.code[index];
+            if (currentOpcode === opcode && !halted) {
+                return true;
+            } else if (currentOpcode === JUMPDEST) {
+                halted = false;
+            } else if ([STOP, RETURN, REVERT, INVALID, SELFDESTRUCT].includes(currentOpcode)) {
+                halted = true;
+            } else if (currentOpcode >= PUSH1 && currentOpcode <= PUSH32) {
+                index += currentOpcode - PUSH1 + 0x01;
+            }
+        }
+        return false;
+    }
+
     getJumpDestinations(): number[] {
         return this.getOpcodes()
             .filter(opcode => opcode.name === 'JUMPDEST')
             .map(opcode => opcode.pc);
     }
 
-    getTotalGas(): number {
-        return this.getOpcodes()
-            .map(opcode => opcode.fee)
-            .reduce((a: number, b: number) => a + b);
-    }
-
-    getSwarmHash(): string | boolean {
+    getSwarmHash(): string | false {
         const regex = /a165627a7a72305820([a-f0-9]{64})0029$/;
         const bytecode = this.getBytecode();
         const match = bytecode.match(regex);
@@ -136,6 +152,19 @@ class EVM {
         } else {
             return false;
         }
+    }
+
+    getABI(): any {
+        const abi: any = [];
+        if (this.instructions.length === 0) {
+            this.parse();
+        }
+        Object.keys(this.functions).forEach((key: string) => {
+            const item: any = abi.push({ type: 'function' });
+            item.name = this.functions[key].label.split('(')[0];
+            item.payable = this.functions[key].payable;
+            item.constant = this.functions[key].constant;
+        });
     }
 
     reset(): void {
@@ -152,12 +181,12 @@ class EVM {
         this.gasUsed = 0;
     }
 
-    parse(): any[] {
+    parse(): Instruction[] {
         if (this.instructions.length === 0) {
             const opcodes = this.getOpcodes();
             for (this.pc; this.pc < opcodes.length && !this.halted; this.pc++) {
                 const opcode = opcodes[this.pc];
-                this.gasUsed += opcode.fee;
+                //console.log(opcode.pc + ': ' + opcode.name);
                 if (!(opcode.name in opcodeFunctions)) {
                     throw new Error('Unknown OPCODE: ' + opcode.name);
                 } else {
