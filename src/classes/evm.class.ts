@@ -166,14 +166,33 @@ export default class EVM {
             this.parse();
         }
         Object.keys(this.functions).forEach((key: string) => {
-            abi.push({ type: 'function' });
-            const item: { name?: any; payable?: any; constant?: any } = abi.push({
-                type: 'function'
-            });
-            item.name = this.functions[key].label.split('(')[0];
-            item.payable = this.functions[key].payable;
-            item.constant = this.functions[key].constant;
+            // abi.push({ type: 'function' });
+            //
+            // const item: any = abi.push({ type: 'function' });
+            // item.name = this.functions[key].label.split('(')[0];
+            // item.payable = this.functions[key].payable;
+            // item.constant = this.functions[key].constant;
+
+            const nameAndParamsRegex = /(.*)\((.*)\)/; // will isolate function name from args ['transfer','address,uint256']
+            const matches = nameAndParamsRegex.exec(this.functions[key].label);
+            if (matches !== null) {
+                const item = {
+                    constant: this.functions[key].constant,
+                    name: matches[1] || '',
+                    inputs:
+                        matches[2].split(',').map((input: string) => {
+                            return {
+                                name: '',
+                                type: input
+                            };
+                        }) || [],
+                    full: this.functions[key],
+                    type: 'function'
+                };
+                abi.push(item);
+            }
         });
+        return abi;
     }
 
     reset(): void {

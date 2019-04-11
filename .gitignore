@@ -27,3 +27,5 @@ jspm_packages/
 
 # Webpack
 .awcache/
+
+scratch
