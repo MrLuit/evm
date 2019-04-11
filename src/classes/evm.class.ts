@@ -166,7 +166,10 @@ export default class EVM {
             this.parse();
         }
         Object.keys(this.functions).forEach((key: string) => {
-            const item: any = abi.push({ type: 'function' });
+            abi.push({ type: 'function' });
+            const item: { name?: any; payable?: any; constant?: any } = abi.push({
+                type: 'function'
+            });
             item.name = this.functions[key].label.split('(')[0];
             item.payable = this.functions[key].payable;
             item.constant = this.functions[key].constant;
