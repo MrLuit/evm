@@ -186,7 +186,14 @@ export default class EVM {
                                 type: input
                             };
                         }) || [],
-                    full: this.functions[key],
+                    outputs:
+                        this.functions[key].returns.map((output: string) => {
+                            return {
+                                name: '',
+                                type: output
+                            };
+                        }) || [],
+                    // full: this.functions[key],
                     type: 'function'
                 };
                 abi.push(item);
