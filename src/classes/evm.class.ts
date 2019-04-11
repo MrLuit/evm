@@ -175,17 +175,19 @@ export default class EVM {
 
             const nameAndParamsRegex = /(.*)\((.*)\)/; // will isolate function name from args ['transfer','address,uint256']
             const matches = nameAndParamsRegex.exec(this.functions[key].label);
-            if (matches !== null) {
+            if (matches !== null && matches[1] && matches[2]) {
                 const item = {
                     constant: this.functions[key].constant,
                     name: matches[1] || '',
                     inputs:
-                        matches[2].split(',').map((input: string) => {
-                            return {
-                                name: '',
-                                type: input
-                            };
-                        }) || [],
+                        matches[2] !== ''
+                            ? matches[2].split(',').map((input: string) => {
+                                  return {
+                                      name: '',
+                                      type: input
+                                  };
+                              }) || []
+                            : [],
                     outputs:
                         this.functions[key].returns.map((output: string) => {
                             return {
@@ -193,12 +195,12 @@ export default class EVM {
                                 type: output
                             };
                         }) || [],
-                    // full: this.functions[key],
                     type: 'function'
                 };
                 abi.push(item);
             }
         });
+        console.log(this.events);
         return abi;
     }
 
