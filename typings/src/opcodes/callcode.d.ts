@@ -11,15 +11,7 @@ export declare class CALLCODE {
     readonly memoryLength: any;
     readonly outputStart: any;
     readonly outputLength: any;
-    constructor(
-        gas: any,
-        address: any,
-        value: any,
-        memoryStart: any,
-        memoryLength: any,
-        outputStart: any,
-        outputLength: any
-    );
+    constructor(gas: any, address: any, value: any, memoryStart: any, memoryLength: any, outputStart: any, outputLength: any);
     toString(): string;
 }
 declare const _default: (opcode: Opcode, state: EVM) => void;

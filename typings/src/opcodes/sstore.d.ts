@@ -10,14 +10,7 @@ export declare class MappingStore {
     readonly data: any;
     readonly structlocation?: any;
     readonly mappings: any;
-    constructor(
-        mappings: any,
-        location: any,
-        items: any,
-        data: any,
-        count: any,
-        structlocation?: any
-    );
+    constructor(mappings: any, location: any, items: any, data: any, count: any, structlocation?: any);
     toString(): string;
 }
 export declare class SSTORE {

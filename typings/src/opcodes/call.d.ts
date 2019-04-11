@@ -12,15 +12,7 @@ export declare class CALL {
     readonly outputStart: any;
     readonly outputLength: any;
     readonly throwOnFail: boolean;
-    constructor(
-        gas: any,
-        address: any,
-        value: any,
-        memoryStart: any,
-        memoryLength: any,
-        outputStart: any,
-        outputLength: any
-    );
+    constructor(gas: any, address: any, value: any, memoryStart: any, memoryLength: any, outputStart: any, outputLength: any);
     toString(): string;
 }
 declare const _default: (opcode: Opcode, state: EVM) => void;
