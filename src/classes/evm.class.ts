@@ -165,12 +165,57 @@ export default class EVM {
         if (this.instructions.length === 0) {
             this.parse();
         }
+        const nameAndParamsRegex = /(.*)\((.*)\)/;
         Object.keys(this.functions).forEach((key: string) => {
-            const item: any = abi.push({ type: 'function' });
-            item.name = this.functions[key].label.split('(')[0];
-            item.payable = this.functions[key].payable;
-            item.constant = this.functions[key].constant;
+            const matches = nameAndParamsRegex.exec(this.functions[key].label);
+            if (matches !== null && matches[1] && matches[2]) {
+                const item = {
+                    constant: this.functions[key].constant,
+                    name: matches[1],
+                    inputs:
+                        matches[2] !== ''
+                            ? matches[2].split(',').map((input: string) => {
+                                  return {
+                                      name: '',
+                                      type: input
+                                  };
+                              })
+                            : [],
+                    outputs:
+                        this.functions[key].returns.map((output: string) => {
+                            return {
+                                name: '',
+                                type: output
+                            };
+                        }) || [],
+                    type: 'function'
+                };
+                abi.push(item);
+            }
         });
+        Object.keys(this.events).forEach((key: string) => {
+            const matches = nameAndParamsRegex.exec(this.events[key].label);
+            if (matches !== null && matches[1] && matches[2]) {
+                const item = {
+                    anonymous: false,
+                    inputs:
+                        matches[2] !== ''
+                            ? matches[2].split(',').map((input: string, index: number) => {
+                                  return {
+                                      indexed: index < this.events[key].indexedCount ? true : false,
+                                      name: '',
+                                      type: input
+                                  };
+                              })
+                            : [],
+                    name: matches[1],
+                    type: 'event'
+                };
+                abi.push(item);
+            }
+        });
+
+        return abi;
     }
 
     reset(): void {
