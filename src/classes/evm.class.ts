@@ -214,6 +214,7 @@ export default class EVM {
                 abi.push(item);
             }
         });
+
         return abi;
     }
 

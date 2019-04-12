@@ -56,7 +56,7 @@ export class MappingStore {
             this.data.right.name === 'MappingLoad' &&
             stringify(this.data.right.location) === stringify(this.location)
         ) {
-            console.log(this.items);
+            // console.log(this.items);
             return (
                 mappingName +
                 this.items.map((item: any) => '[' + stringify(item) + ']').join('') +
@@ -69,7 +69,7 @@ export class MappingStore {
             this.data.left.name === 'MappingLoad' &&
             stringify(this.data.left.location) === stringify(this.location)
         ) {
-            console.log(this.items);
+            // console.log(this.items);
             return (
                 mappingName +
                 this.items.map((item: any) => '[' + stringify(item) + ']').join('') +

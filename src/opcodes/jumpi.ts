@@ -214,9 +214,9 @@ export default (opcode: Opcode, state: EVM): void => {
     const jumpLocation = state.stack.pop();
     const jumpCondition = state.stack.pop();
     const opcodes = state.getOpcodes();
-    console.log(jumpLocation);
-    console.log(state.conditions);
-    console.log('-');
+    // console.log(jumpLocation);
+    // console.log(state.conditions);
+    // console.log('-');
     if (!BigNumber.isInstance(jumpLocation)) {
         state.halted = true;
         state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
