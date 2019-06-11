@@ -1,17 +1,18 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
+import Instruction from '../classes/instruction.class';
 import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class ADD {
-    readonly name: string;
-    readonly wrapped: boolean;
+    readonly type: string;
+    readonly static: boolean;
     readonly left: any;
     readonly right: any;
 
     constructor(left: any, right: any) {
-        this.name = 'ADD';
-        this.wrapped = true;
+        this.type = 'ADD';
+        this.static = false;
         this.left = left;
         this.right = right;
     }
@@ -19,30 +20,16 @@ export class ADD {
     toString() {
         return stringify(this.left) + ' + ' + stringify(this.right);
     }
-
-    get type() {
-        if (this.left.type === this.right.type) {
-            return this.left.type;
-        } else if (!this.left.type && this.right.type) {
-            return this.right.type;
-        } else if (!this.right.type && this.left.type) {
-            return this.left.type;
-        } else {
-            return false;
-        }
-    }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (opcode: Opcode, state: EVM): Instruction => {
     const left = state.stack.pop();
     const right = state.stack.pop();
+    const instruction = new Instruction(opcode.name, opcode.pc);
     if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
         state.stack.push(left.add(right));
-    } else if (BigNumber.isInstance(left) && left.isZero()) {
-        state.stack.push(right);
-    } else if (BigNumber.isInstance(right) && right.isZero()) {
-        state.stack.push(left);
     } else {
         state.stack.push(new ADD(left, right));
     }
+    return instruction;
 };

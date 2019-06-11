@@ -1,10 +1,6 @@
 {
   "defaultSeverity": "error",
-  "extends": [
-    "tslint:recommended",
-    "tslint-config-prettier",
-    "tslint-no-unused-expression-chai"
-  ],
+  "extends": ["tslint:recommended", "tslint-config-prettier"],
   "jsRules": {
     "quotemark": false,
     "max-line-length": false,
@@ -29,8 +25,7 @@
     "no-conditional-assignment": false,
     "no-bitwise": false,
     "max-classes-per-file": false,
-    "member-access": [true, "no-public"],
-    "no-unused-expression-chai": true
+    "member-access": [true, "no-public"]
   },
   "linterOptions": {
     "exclude": [
@@ -38,8 +33,5 @@
       "**/*.json"
     ]
   },
-  "rulesDirectory": [
-    "node_modules/tslint-microsoft-contrib",
-    "node_modules/tslint-no-unused-expression-chai"
-  ]
+  "rulesDirectory": ["node_modules/tslint-microsoft-contrib"]
 }

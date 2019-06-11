@@ -1,10 +1,10 @@
 export const stringifyInstructions = (instructionTree: any, indentation = 0): string => {
     let instructionLines = '';
     instructionTree.forEach((instruction: any) => {
-        if (instruction.name === 'JUMPI' && instruction.false) {
+        if (instruction.type === 'JUMPI' && instruction.false) {
             const condition = instruction.toString();
             const falseInstructions = instruction.false.filter((i: any) => i.debugLevel > 0);
-            if (falseInstructions.length === 1 && falseInstructions[0].name === 'JUMPI') {
+            if (falseInstructions.length === 1 && falseInstructions[0].type === 'JUMPI') {
                 instructionLines += ' '.repeat(indentation) + 'if' + condition + ' {\n';
                 instructionLines += stringifyInstructions(instruction.true, indentation + 4);
                 instructionLines += ' '.repeat(indentation) + '} else ';

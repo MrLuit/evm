@@ -31,9 +31,6 @@ export default (functionName: string, functionInstance: any): string => {
     if (functionInstance.payable) {
         output += ' payable';
     }
-    if (functionInstance.returns.length > 0) {
-        output += ' returns (' + functionInstance.returns.join(', ') + ')';
-    }
     output += ' {\n';
     output += stringifyInstructions(functionInstance.items, 4);
     output += '}\n\n';

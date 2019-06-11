@@ -1,16 +1,16 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
+import Instruction from '../classes/instruction.class';
 import stringify from '../utils/stringify';
 
 export class EXTCODEHASH {
-    readonly name: string;
-    readonly type?: string;
-    readonly wrapped: boolean;
+    readonly type: string;
+    readonly static: boolean;
     readonly address: any;
 
     constructor(address: any) {
-        this.name = 'EXTCODEHASH';
-        this.wrapped = true;
+        this.type = 'EXTCODEHASH';
+        this.static = false;
         this.address = address;
     }
 
@@ -19,7 +19,9 @@ export class EXTCODEHASH {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (opcode: Opcode, state: EVM): Instruction => {
     const address = state.stack.pop();
+    const instruction = new Instruction(opcode.name, opcode.pc);
     state.stack.push(new EXTCODEHASH(address));
+    return instruction;
 };

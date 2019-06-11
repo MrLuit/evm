@@ -1,13 +1,13 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
+import Instruction from '../classes/instruction.class';
 import { MLOAD } from './mload';
 import * as eventHashes from '../../data/eventHashes.json';
 import * as BigNumber from '../../node_modules/big-integer';
 
 export class LOG {
-    readonly name: string;
-    readonly type?: string;
-    readonly wrapped: boolean;
+    readonly type: string;
+    readonly static: boolean;
     readonly memoryStart?: any;
     readonly memoryLength?: any;
     readonly items?: any;
@@ -15,8 +15,8 @@ export class LOG {
     readonly eventName?: string;
 
     constructor(topics: any, items?: any, memoryStart?: any, memoryLength?: any) {
-        this.name = 'LOG';
-        this.wrapped = true;
+        this.type = 'LOG';
+        this.static = false;
         this.topics = topics;
         if (
             this.topics.length > 0 &&
@@ -45,23 +45,14 @@ export class LOG {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (opcode: Opcode, state: EVM): Instruction => {
+    const instruction = new Instruction(opcode.name, opcode.pc);
     const topicsCount = parseInt(opcode.name.replace('LOG', ''), 10);
     const memoryStart = state.stack.pop();
     const memoryLength = state.stack.pop();
     const topics = [];
     for (let i = 0; i < topicsCount; i++) {
         topics.push(state.stack.pop());
-    }
-    if (topics.length > 0) {
-        const eventTopic = topics[0].toString(16);
-        if (!(eventTopic in state.events)) {
-            state.events[eventTopic] = {};
-            state.events[eventTopic].indexedCount = topics.length - 1;
-            if (eventTopic in eventHashes) {
-                state.events[eventTopic].label = (eventHashes as any)[eventTopic];
-            }
-        }
     }
     if (BigNumber.isInstance(memoryStart) && BigNumber.isInstance(memoryLength)) {
         const items = [];
@@ -76,14 +67,9 @@ export default (opcode: Opcode, state: EVM): void => {
                 items.push(new MLOAD(i));
             }
         }
-        if (topics.length === 0) {
-            if (!('anonymous' in state.events)) {
-                state.events.anonymous = [];
-            }
-            state.events.anonymous.push({ items });
-        }
         state.instructions.push(new LOG(topics, items));
     } else {
         state.instructions.push(new LOG(topics, [], memoryStart, memoryLength));
     }
+    return instruction;
 };

@@ -34,7 +34,7 @@ export default class Stack {
     }
 
     swap(secondPosition: number): void {
-        if (secondPosition < 1 || secondPosition > 16) {
+        if (secondPosition < 0 || secondPosition > 15) {
             throw new Error('Unsupported position for swap operation');
         } else if (!(secondPosition in this.elements)) {
             throw new Error("Invalid swap operation, provided position wasn't found in stack");

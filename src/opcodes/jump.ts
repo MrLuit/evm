@@ -1,18 +1,18 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
+import Instruction from '../classes/instruction.class';
 import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class JUMP {
-    readonly name: string;
-    readonly type?: string;
-    readonly wrapped: boolean;
+    readonly type: string;
+    readonly static: boolean;
     readonly valid: boolean;
     readonly location: any;
 
     constructor(location: any, bad?: boolean) {
-        this.name = 'JUMP';
-        this.wrapped = false;
+        this.type = 'JUMP';
+        this.static = true;
         this.location = location;
         this.valid = true;
         if (bad) {
@@ -29,8 +29,10 @@ export class JUMP {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (opcode: Opcode, state: EVM): Instruction => {
     const jumpLocation = state.stack.pop();
+    const instruction = new Instruction(opcode.name, opcode.pc);
+    instruction.setDescription('goto(%s);', jumpLocation);
     if (!BigNumber.isInstance(jumpLocation)) {
         state.halted = true;
         state.instructions.push(new JUMP(jumpLocation, true));
@@ -43,6 +45,7 @@ export default (opcode: Opcode, state: EVM): void => {
         } else {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
             if (!(opcode.pc + ':' + jumpLocation.toJSNumber() in state.jumps)) {
+                state.jumps[opcode.pc + ':' + jumpLocation.toJSNumber()] = true;
                 if (!jumpLocationData || jumpLocationData.name !== 'JUMPDEST') {
                     state.halted = true;
                     state.instructions.push(new JUMP(jumpLocation, true));
@@ -51,16 +54,10 @@ export default (opcode: Opcode, state: EVM): void => {
                     jumpIndex >= 0 &&
                     jumpLocationData.name === 'JUMPDEST'
                 ) {
-                    state.jumps[opcode.pc + ':' + jumpLocation.toJSNumber()] = true;
-                    state.pc = jumpIndex;
-                } else {
-                    state.halted = true;
-                    state.instructions.push(new JUMP(jumpLocation, true));
+                    state.pc = jumpIndex - 1;
                 }
-            } else {
-                state.halted = true;
-                state.instructions.push(new JUMP(jumpLocation));
             }
         }
     }
+    return instruction;
 };

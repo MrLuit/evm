@@ -1,15 +1,14 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
+import Instruction from '../classes/instruction.class';
 
 export class CALLER {
-    readonly name: string;
-    readonly type?: string;
-    readonly wrapped: boolean;
+    readonly type: string;
+    readonly static: boolean;
 
     constructor() {
-        this.name = 'CALLER';
-        this.name = 'address';
-        this.wrapped = false;
+        this.type = 'CALLER';
+        this.static = true;
     }
 
     toString() {
@@ -17,6 +16,8 @@ export class CALLER {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (opcode: Opcode, state: EVM): Instruction => {
+    const instruction = new Instruction(opcode.name, opcode.pc);
     state.stack.push(new CALLER());
+    return instruction;
 };

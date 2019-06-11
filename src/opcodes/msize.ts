@@ -1,14 +1,14 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
+import Instruction from '../classes/instruction.class';
 
 export class MSIZE {
-    readonly name: string;
-    readonly type?: string;
-    readonly wrapped: boolean;
+    readonly type: string;
+    readonly static: boolean;
 
     constructor() {
-        this.name = 'MSIZE';
-        this.wrapped = false;
+        this.type = 'MSIZE';
+        this.static = true;
     }
 
     toString() {
@@ -16,6 +16,8 @@ export class MSIZE {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (opcode: Opcode, state: EVM): Instruction => {
+    const instruction = new Instruction(opcode.name, opcode.pc);
     state.stack.push(new MSIZE());
+    return instruction;
 };

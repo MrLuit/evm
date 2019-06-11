@@ -1,17 +1,17 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
+import Instruction from '../classes/instruction.class';
 import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class SIG {
-    readonly name: string;
-    readonly type?: string;
-    readonly wrapped: boolean;
+    readonly type: string;
+    readonly static: boolean;
     readonly hash: string;
 
     constructor(hash: string) {
-        this.name = 'SIG';
-        this.wrapped = false;
+        this.type = 'SIG';
+        this.static = true;
         this.hash = hash;
     }
 
@@ -21,15 +21,14 @@ export class SIG {
 }
 
 export class EQ {
-    readonly name: string;
-    readonly type?: string;
-    readonly wrapped: boolean;
+    readonly type: string;
+    readonly static: boolean;
     readonly left: any;
     readonly right: any;
 
     constructor(left: any, right: any) {
-        this.name = 'EQ';
-        this.wrapped = true;
+        this.type = 'EQ';
+        this.static = false;
         this.left = left;
         this.right = right;
     }
@@ -39,15 +38,16 @@ export class EQ {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (opcode: Opcode, state: EVM): Instruction => {
     let left = state.stack.pop();
     let right = state.stack.pop();
+    const instruction = new Instruction(opcode.name, opcode.pc);
     if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
         state.stack.push(BigNumber(left.equals(right) === true ? 1 : 0));
     } else {
         if (
             BigNumber.isInstance(left) &&
-            right.name === 'DIV' &&
+            right.type === 'DIV' &&
             BigNumber.isInstance(right.right)
         ) {
             left = left.multiply(right.right);
@@ -55,7 +55,7 @@ export default (opcode: Opcode, state: EVM): void => {
         }
         if (
             BigNumber.isInstance(right) &&
-            left.name === 'DIV' &&
+            left.type === 'DIV' &&
             BigNumber.isInstance(left.right)
         ) {
             right = right.multiply(left.right);
@@ -64,7 +64,7 @@ export default (opcode: Opcode, state: EVM): void => {
         if (
             BigNumber.isInstance(left) &&
             /^[0]+$/.test(left.toString(16).substring(8)) &&
-            right.name === 'CALLDATALOAD' &&
+            right.type === 'CALLDATALOAD' &&
             right.location.equals(0)
         ) {
             state.stack.push(
@@ -76,7 +76,7 @@ export default (opcode: Opcode, state: EVM): void => {
         } else if (
             BigNumber.isInstance(right) &&
             /^[0]+$/.test(right.toString(16).substring(8)) &&
-            left.name === 'CALLDATALOAD' &&
+            left.type === 'CALLDATALOAD' &&
             left.location.equals(0)
         ) {
             state.stack.push(
@@ -89,4 +89,5 @@ export default (opcode: Opcode, state: EVM): void => {
             state.stack.push(new EQ(left, right));
         }
     }
+    return instruction;
 };

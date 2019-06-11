@@ -1,14 +1,14 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
+import Instruction from '../classes/instruction.class';
 
 export class CODESIZE {
-    readonly name: string;
-    readonly type?: string;
-    readonly wrapped: boolean;
+    readonly type: string;
+    readonly static: boolean;
 
     constructor() {
-        this.name = 'CODESIZE';
-        this.wrapped = false;
+        this.type = 'CODESIZE';
+        this.static = true;
     }
 
     toString() {
@@ -16,6 +16,8 @@ export class CODESIZE {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (opcode: Opcode, state: EVM): Instruction => {
+    const instruction = new Instruction(opcode.name, opcode.pc);
     state.stack.push(new CODESIZE());
+    return instruction;
 };

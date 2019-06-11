@@ -1,20 +1,20 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
+import Instruction from '../classes/instruction.class';
 import { MLOAD } from './mload';
 import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class REVERT {
-    readonly name: string;
-    readonly type?: string;
-    readonly wrapped: boolean;
+    readonly type: string;
+    readonly static: boolean;
     readonly memoryStart?: any;
     readonly memoryLength?: any;
     readonly items: any;
 
     constructor(items: any, memoryStart?: any, memoryLength?: any) {
-        this.name = 'REVERT';
-        this.wrapped = true;
+        this.type = 'REVERT';
+        this.static = false;
         if (memoryStart && memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;
@@ -40,9 +40,11 @@ export class REVERT {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (opcode: Opcode, state: EVM): Instruction => {
     const memoryStart = state.stack.pop();
     const memoryLength = state.stack.pop();
+    const instruction = new Instruction(opcode.name, opcode.pc);
+    instruction.halt();
     state.halted = true;
     if (BigNumber.isInstance(memoryStart) && BigNumber.isInstance(memoryLength)) {
         const items = [];
@@ -61,4 +63,5 @@ export default (opcode: Opcode, state: EVM): void => {
     } else {
         state.instructions.push(new REVERT([], memoryStart, memoryLength));
     }
+    return instruction;
 };

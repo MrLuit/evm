@@ -14,6 +14,7 @@ An [Ethereum Virtual Machine (EVM)](https://medium.com/@jeff.ethereum/optimising
 - **Converting bytecode to opcodes**
 - **Reading information like events or functions from either bytecode or tx data**
 - **Extracting the [swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (if any) from bytecode**
+- **Generating ABI from bytecode (EXPERIMENTAL)**
 
 ## API
 
