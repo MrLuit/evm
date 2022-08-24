@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { Configuration } from 'webpack';
 import * as nodeExternals from 'webpack-node-externals';
-import * as merge from 'webpack-merge';
+import merge from 'webpack-merge';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 const sourcePath = path.resolve(__dirname, 'src');
@@ -24,12 +24,7 @@ const config: Configuration = {
                 test: /\.ts$/,
                 use: [
                     {
-                        loader: 'awesome-typescript-loader',
-                        options: {
-                            useCache: true,
-                            useBabel: true,
-                            babelCore: '@babel/core'
-                        }
+                        loader: 'ts-loader'
                     }
                 ],
                 exclude: /node_modules/
@@ -44,7 +39,7 @@ const config: Configuration = {
     devtool: 'source-map'
 };
 
-const browser: Configuration = merge.smart(config, {
+const browser: Configuration = merge(config, {
     target: 'web',
     output: {
         libraryTarget: 'umd',
@@ -53,7 +48,7 @@ const browser: Configuration = merge.smart(config, {
     }
 });
 
-const node: Configuration = merge.smart(config, {
+const node: Configuration = merge(config, {
     target: 'node',
     externals: [nodeExternals()],
     output: {
